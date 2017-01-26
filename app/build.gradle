@@ -1,0 +1,56 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "23.0.1"
+    defaultConfig {
+        applicationId 'io.geph.android'
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionCode 1
+        versionName "A002"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi', 'x86'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'jni/Android.mk'
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:recyclerview-v7:25.0.0'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.google.code.gson:gson:2.7'
+    testCompile 'junit:junit:4.12'
+}
+
+task copyGephBinaries(type: Copy) {
+    description = 'Copying geph binaries from the prebuild directory'
+    from '../prebuild/'
+    into 'src/main/jniLibs'
+}
+
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        variant.javaCompiler.dependsOn(copyGephBinaries)
+    }
+}

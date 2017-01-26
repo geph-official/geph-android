@@ -1,0 +1,16 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="image_width">160dp</dimen>
+    <dimen name="image_final_width">32dp</dimen>
+    <dimen name="status_line_height">33dp</dimen>
+    <dimen name="status_column_header_font_size">15sp</dimen>
+    <dimen name="status_column_value_font_size">15sp</dimen>
+    <dimen name="status_column_value_left_margin">20dp</dimen>
+    <dimen name="button_corner_radius">5dp</dimen>
+    <dimen name="text_em">17sp</dimen>
+    <dimen name="text_plain">15sp</dimen>
+</resources>
