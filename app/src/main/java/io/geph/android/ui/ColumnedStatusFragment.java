@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import io.geph.android.Constants;
 import io.geph.android.R;
 import io.geph.android.api.GephServiceHelper;
 import io.geph.android.api.SimpleTask;
@@ -29,7 +30,7 @@ import io.geph.android.api.tasks.GetSummaryTask;
 public class ColumnedStatusFragment extends Fragment implements StatusInterface {
 
     private static final String TAG = ColumnedStatusFragment.class.getSimpleName();
-    private static final int BYTE_BASE = 1024;
+    private static final int BYTE_BASE = Constants.BYTE_BASE;
     private static final String[] NET_SPEED_UNITS = new String[]{"KB/s", "MB/s", "GB/s"};
     private static final String[] BALANCE_UNITS = new String[]{"MB", "GB", "TB"};
     private static final long mBalanceRefreshEpoch = 10 * 1000;
