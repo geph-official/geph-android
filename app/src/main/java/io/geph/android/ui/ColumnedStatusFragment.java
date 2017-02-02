@@ -1,5 +1,6 @@
 package io.geph.android.ui;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -41,8 +42,15 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
     private Handler mUiHandler;
     private long mLastBytesRx = 0;
     private long mLastBytesTx = 0;
+    private long mLastUpdated;
     private long mBalanceUpdated = 0;
+    /**
+     * A task to get Geph summary
+     */
     private GetSummaryTask mGetSummaryTask = new GetSummaryTask(TAG);
+    /**
+     * Periodical task to perform on receiving Geph summary
+     */
     private SimpleTask<Summary> mOnFetchingNewSummary = new SimpleTask<Summary>() {
         @Override
         public void doTask(Summary summary) {
@@ -50,15 +58,22 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
                 try {
                     ((SimpleUiControl) getParentFragment()).notifyStatus(summary.getStatus());
 
-                    long rx = summary.getBytesRx();
-                    refresh(mTransfer, formatSpeed(rx - mLastBytesRx, 1));
-                    mLastBytesRx = rx;
+                    long currentUptime = summary.getUptime();
 
-                    long tx = summary.getBytesTx();
-                    if (mLastBytesTx > 0) {
-                        // update UPLOAD
+                    int timeDiff = (int) (currentUptime - mLastUpdated);
+                    /*
+                        Note: Android Timer does not run reliably.
+                        Make sure there are some changes to display correctly.
+                     */
+                    if (timeDiff > 0) {
+                        long rx = summary.getBytesRx();
+                        refresh(mTransfer, formatSpeed(rx - mLastBytesRx, timeDiff));
+                        mLastBytesRx = rx;
+
+                        // record and display Tx if needed
+
+                        mLastUpdated = currentUptime;
                     }
-                    mLastBytesTx = tx;
 
                     if (summary.getStatus().equalsIgnoreCase(Summary.STATUS_CONNECTED)) {
                         GephServiceHelper.callAsync(
@@ -104,6 +119,29 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
             }
         }
     };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences sp = getContext().getSharedPreferences(Constants.PREFS, 0);
+
+        mLastBytesTx = sp.getLong(Constants.SP_LAST_BYTES_TX, 0);
+        mLastBytesRx = sp.getLong(Constants.SP_LAST_BYTES_RX, 0);
+        mLastUpdated = sp.getLong(Constants.SP_LAST_UPDATED, 0);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences sp = getContext().getSharedPreferences(Constants.PREFS, 0);
+        SharedPreferences.Editor editor = sp.edit();
+
+        editor.putLong(Constants.SP_LAST_BYTES_TX, mLastBytesTx);
+        editor.putLong(Constants.SP_LAST_BYTES_RX, mLastBytesRx);
+        editor.putLong(Constants.SP_LAST_UPDATED, mLastUpdated);
+
+        editor.commit();
+    }
 
     /**
      * Simple helper
@@ -181,7 +219,7 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
      * Note that for 'Normal' condition (i.e. `status` is a non-empty string which represents
      * an entry address), the first six HEX digits of the address should also be displayed
      * followed by the status string (e.g. Normal (BEEF00) ).
-     *
+     * <p>
      * Display a formatted connection status with a proper color id
      *
      * @param status a status string or an entry address

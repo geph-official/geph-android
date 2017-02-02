@@ -41,6 +41,9 @@ import io.geph.android.ui.RegistrationFragment;
 import io.geph.android.ui.SettingsActivity;
 import io.geph.android.ui.SimpleUiControl;
 
+import static io.geph.android.Constants.SP_LAST_BYTES_RX;
+import static io.geph.android.Constants.SP_LAST_BYTES_TX;
+import static io.geph.android.Constants.SP_LAST_UPDATED;
 import static io.geph.android.Constants.SP_PASSWORD;
 import static io.geph.android.Constants.SP_USERNAME;
 import static io.geph.android.ui.RegistrationFragment.CAPTCHA_ID_EXTRA;
@@ -305,6 +308,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         spEditString(SP_PASSWORD, "");
         spEditBoolean(IS_SIGNED_IN, false);
 
+        spRemove(SP_LAST_BYTES_RX);
+        spRemove(SP_LAST_BYTES_TX);
+        spRemove(SP_LAST_UPDATED);
+
         showLoginFragment();
     }
 
@@ -473,6 +480,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private void spEditBoolean(String key, boolean value) {
         SharedPreferences.Editor editor = getPrefEditor();
         editor.putBoolean(key, value);
+        editor.commit();
+    }
+
+    private void spRemove(String key) {
+        SharedPreferences.Editor editor = getPrefEditor();
+        editor.remove(key);
         editor.commit();
     }
 
