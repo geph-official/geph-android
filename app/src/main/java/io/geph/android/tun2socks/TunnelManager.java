@@ -181,8 +181,6 @@ public class TunnelManager implements Tunnel.HostService {
             List<String> commands = new ArrayList<>();
             commands.add(daemonBinaryPath);
             commands.add("client");
-            commands.add("-cachedir");
-            commands.add(socksProxyCacheDir.getAbsolutePath());
             commands.add("-powersave");
             commands.add("-uname");
             commands.add(AccountUtils.getUsername(getContext()));
@@ -192,9 +190,15 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(geoDb.getAbsolutePath());
 
             SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            // conditionally enable whitelist option
             if (spref.getBoolean(Constants.SETTINGS_WHITELIST, false)) {
                 commands.add("-whitelist");
                 commands.add("CN");
+            }
+            // conditionally enable cache option
+            if (spref.getBoolean(Constants.SETTINGS_CACHE, false)) {
+                commands.add("-cachedir");
+                commands.add(socksProxyCacheDir.getAbsolutePath());
             }
 
             ProcessBuilder pb = new ProcessBuilder(commands);

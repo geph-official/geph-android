@@ -52,4 +52,7 @@
     <string name="toggle_the_below_button_to_start_stop_geph">스위치를 눌러 Geph를 실행하거나 종료하세요</string>
     <string name="backup">백업</string>
     <string name="normal">정상</string>
+    <string name="cache_network_info_option_title">네트워크 정보 캐싱</string>
+    <string name="cache_network_info_option_summary">앱 성능을 개선하기 위해 네트워크 정보를 캐싱합니다</string>
+    <string name="debug">디버그</string>
 </resources>
