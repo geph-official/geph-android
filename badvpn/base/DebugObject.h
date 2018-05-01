@@ -113,7 +113,7 @@ void DebugObject_Init (DebugObject *obj)
 
 void DebugObject_Free (DebugObject *obj)
 {
-    ASSERT(obj->c == DEBUGOBJECT_VALID)
+    //ASSERT(obj->c == DEBUGOBJECT_VALID)
     
     #ifndef NDEBUG
     

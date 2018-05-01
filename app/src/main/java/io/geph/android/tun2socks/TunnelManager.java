@@ -196,7 +196,7 @@ public class TunnelManager implements Tunnel.HostService {
                 commands.add("CN");
             }
             // conditionally enable cache option
-            if (spref.getBoolean(Constants.SETTINGS_CACHE, false)) {
+            if (spref.getBoolean(Constants.SETTINGS_CACHE, true)) {
                 commands.add("-cachedir");
                 commands.add(socksProxyCacheDir.getAbsolutePath());
             }

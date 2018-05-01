@@ -82,14 +82,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="5dp">
+
             <TextView
-                android:layout_alignParentEnd="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
+                android:layout_alignParentEnd="true"
+                android:text="@string/plan_type"
                 android:textColor="@color/black_light"
                 android:textSize="@dimen/status_column_header_font_size"
-                android:text="@string/transfer" />
+                android:textStyle="bold" />
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="0dp"
@@ -98,7 +99,7 @@
             android:padding="5dp"
             android:layout_marginLeft="@dimen/status_column_value_left_margin">
             <TextView
-                android:id="@+id/status_transfer"
+                android:id="@+id/status_plan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black_light"

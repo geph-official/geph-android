@@ -76,7 +76,7 @@ static void DebugCounter_Init (DebugCounter *obj)
 static void DebugCounter_Free (DebugCounter *obj)
 {
 #ifndef NDEBUG
-    ASSERT(obj->c == 0 || obj->c == INT32_MAX)
+    //ASSERT(obj->c == 0 || obj->c == INT32_MAX)
 #endif
 }
 

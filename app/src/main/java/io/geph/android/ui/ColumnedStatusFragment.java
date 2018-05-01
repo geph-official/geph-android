@@ -3,6 +3,7 @@ package io.geph.android.ui;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -11,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.gson.JsonObject;
 
 import io.geph.android.Constants;
 import io.geph.android.R;
@@ -37,8 +40,8 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
     private static final long mBalanceRefreshEpoch = 10 * 1000;
     private TextView mPubIp;
     private TextView mConnection;
-    private TextView mTransfer;
     private TextView mBalance;
+    private TextView mPlan;
     private Handler mUiHandler;
     private long mLastBytesRx = 0;
     private long mLastBytesTx = 0;
@@ -57,23 +60,6 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
             if (summary != null) {
                 try {
                     ((SimpleUiControl) getParentFragment()).notifyStatus(summary.getStatus());
-
-                    long currentUptime = summary.getUptime();
-
-                    int timeDiff = (int) (currentUptime - mLastUpdated);
-                    /*
-                        Note: Android Timer does not run reliably.
-                        Make sure there are some changes to display correctly.
-                     */
-                    if (timeDiff > 0) {
-                        long rx = summary.getBytesRx();
-                        refresh(mTransfer, formatSpeed(rx - mLastBytesRx, timeDiff));
-                        mLastBytesRx = rx;
-
-                        // record and display Tx if needed
-
-                        mLastUpdated = currentUptime;
-                    }
 
                     if (summary.getStatus().equalsIgnoreCase(Summary.STATUS_CONNECTED)) {
                         GephServiceHelper.callAsync(
@@ -102,8 +88,28 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
                                         @Override
                                         public void doTask(AccountInfo arg) {
                                             if (arg != null) {
-                                                refresh(mBalance, formatBalance(arg.getBalance()));
-                                                mBalanceUpdated = now;
+                                                try {
+                                                    Log.d(TAG, "WANNA UPDATE!");
+                                                    mBalanceUpdated = now;
+                                                    JsonObject prinfo = arg.getPremiumInfo();
+                                                    if (prinfo.getAsJsonPrimitive("Plan").getAsString().equals("")) {
+                                                        Log.d(TAG, "UPDATE AS FREE");
+                                                        refresh(mBalance, formatBalance(arg.getBalance()));
+                                                        refresh(mPlan, getString(R.string.free));
+                                                    } else {
+                                                        Log.d(TAG, "UPDATE AS PAID");
+                                                        JsonObject desc = prinfo.getAsJsonObject("Desc");
+                                                        refresh(mPlan, desc.getAsJsonObject("Name")
+                                                                .getAsJsonPrimitive("en").getAsString());
+                                                        if (prinfo.getAsJsonPrimitive("Unlimited").getAsBoolean()) {
+                                                            refresh(mBalance, getString(R.string.unlimited));
+                                                        } else {
+                                                            refresh(mBalance, formatBalance(arg.getBalance()));
+                                                        }
+                                                    }
+                                                } catch (Exception e) {
+                                                    Log.d(TAG, "UPDATE ERROR " + e.toString());
+                                                }
                                             }
                                         }
                                     }
@@ -165,7 +171,7 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
 
         mPubIp = (TextView) v.findViewById(R.id.status_public_ip);
         mConnection = (TextView) v.findViewById(R.id.status_connection);
-        mTransfer = (TextView) v.findViewById(R.id.status_transfer);
+        mPlan = (TextView) v.findViewById(R.id.status_plan);
         mBalance = (TextView) v.findViewById(R.id.status_balance);
 
         renderConnStatus("connecting");
@@ -256,7 +262,7 @@ public class ColumnedStatusFragment extends Fragment implements StatusInterface 
      * @return a formatted string with proper units in [K,M,G]B/s
      */
     private String formatSpeed(long bytes, int duration) {
-        double adjusted = bytes / BYTE_BASE;
+        double adjusted = bytes * 1000 / BYTE_BASE;
         adjusted /= duration;
         int pos = 0;
         while (adjusted >= BYTE_BASE) {
