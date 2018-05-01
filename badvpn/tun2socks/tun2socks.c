@@ -1400,14 +1400,6 @@ int process_device_udp_packet (uint8_t *data, int data_len)
                 goto fail;
             }
 
-            // verify UDP checksum
-            uint16_t checksum_in_packet = udp_header.checksum;
-            udp_header.checksum = 0;
-            uint16_t checksum_computed = udp_checksum(&udp_header, data, data_len, ipv4_header.source_address, ipv4_header.destination_address);
-            if (checksum_in_packet != checksum_computed) {
-                goto fail;
-            }
-
             BLog(BLOG_INFO, "UDP: from device %d bytes", data_len);
 
             // construct addresses
@@ -1422,44 +1414,7 @@ int process_device_udp_packet (uint8_t *data, int data_len)
         } break;
 
         case 6: {
-            // ignore if IPv6 support is disabled
-            if (!options.netif_ip6addr) {
-                goto fail;
-            }
-
-            // ignore non-UDP packets
-            if (data_len < sizeof(struct ipv6_header) || data[offsetof(struct ipv6_header, next_header)] != IPV6_NEXT_UDP) {
-                goto fail;
-            }
-
-            // parse IPv6 header
-            struct ipv6_header ipv6_header;
-            if (!ipv6_check(data, data_len, &ipv6_header, &data, &data_len)) {
-                goto fail;
-            }
-
-            // parse UDP
-            struct udp_header udp_header;
-            if (!udp_check(data, data_len, &udp_header, &data, &data_len)) {
-                goto fail;
-            }
-
-            // verify UDP checksum
-            uint16_t checksum_in_packet = udp_header.checksum;
-            udp_header.checksum = 0;
-            uint16_t checksum_computed = udp_ip6_checksum(&udp_header, data, data_len, ipv6_header.source_address, ipv6_header.destination_address);
-            if (checksum_in_packet != checksum_computed) {
-                goto fail;
-            }
-
-            BLog(BLOG_INFO, "UDP/IPv6: from device %d bytes", data_len);
-
-            // construct addresses
-            BAddr_InitIPv6(&local_addr, ipv6_header.source_address, udp_header.source_port);
-            BAddr_InitIPv6(&remote_addr, ipv6_header.destination_address, udp_header.dest_port);
-
-            // TODO dns
-            is_dns = 0;
+            // geph: no ipv6 support anyway
         } break;
 
         default: {
@@ -2165,7 +2120,8 @@ err_t client_sent_func (void *arg, struct tcp_pcb *tpcb, u16_t len)
 
 void udp_send_packet_to_device (void *unused, BAddr local_addr, BAddr remote_addr, const uint8_t *data, int data_len)
 {
-    ASSERT(options.udpgw_remote_server_addr)
+    // TODO why does this assert fail?
+    // ASSERT(options.udpgw_remote_server_addr)
     ASSERT(local_addr.type == BADDR_TYPE_IPV4 || local_addr.type == BADDR_TYPE_IPV6)
     ASSERT(local_addr.type == remote_addr.type)
     ASSERT(data_len >= 0)

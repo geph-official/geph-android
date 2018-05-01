@@ -58,4 +58,13 @@
     <string name="toggle_the_below_button_to_start_stop_geph">Use the switch to turn on Geph</string>
     <string name="normal">Normal</string>
     <string name="backup">Backup</string>
+    <string name="cache_network_info_option_title">Cache network information</string>
+    <string name="cache_network_info_option_summary">Enable Geph to cache network information to improve the app performance.</string>
+    <string name="debug">Debug</string>
+    <string name="update_notification">A new version of Geph is available!</string>
+    <string name="download_and_install">Tap to download</string>
+    <string name="later">Later</string>
+    <string name="plan_type">Plan</string>
+    <string name="unlimited">Unlimited</string>
+    <string name="free">Free</string>
 </resources>

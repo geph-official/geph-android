@@ -167,8 +167,8 @@ fail0:
 
 void BSignal_Finish (void)
 {
-    ASSERT(bsignal_global.initialized)
-    ASSERT(!bsignal_global.finished)
+    //ASSERT(bsignal_global.initialized)
+    //ASSERT(!bsignal_global.finished)
     
     #ifdef BADVPN_USE_WINAPI
     

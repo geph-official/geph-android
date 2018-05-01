@@ -52,4 +52,9 @@
     <string name="access_blocked_sites">尽享没有封锁的互联网！</string>
     <string name="backup">备用</string>
     <string name="normal">快速</string>
+    <string name="update_notification">迷雾通可以更新到新的版本！</string>
+    <string name="download_and_install">点击下载最新版本</string>
+    <string name="plan_type">帐户类型</string>
+    <string name="unlimited">无限</string>
+    <string name="free">免费</string>
 </resources>

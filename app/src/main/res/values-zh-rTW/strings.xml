@@ -52,4 +52,9 @@
     <string name="transfer">當前速率</string>
     <string name="backup">備用</string>
     <string name="normal">快速</string>
+    <string name="update_notification">迷霧通可以更新到新的版本！</string>
+    <string name="download_and_install">點擊下載最新版本</string>
+    <string name="plan_type">帳戶類型</string>
+    <string name="unlimited">無限</string>
+    <string name="free">免費</string>
 </resources>

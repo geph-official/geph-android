@@ -13,5 +13,5 @@ TARGET="libgeph.so"
 
 mkdir -p $ARM_DIR
 mkdir -p $X86_DIR
-curl https://dl.geph.io/XGO_BUILD/geph-v$1-android-16-arm > $ARM_DIR/$TARGET
-curl https://dl.geph.io/XGO_BUILD/geph-v$1-android-16-386 > $X86_DIR/$TARGET
+curl https://dl.geph.io/XGO_BUILD/geph-$1-android-16-arm > $ARM_DIR/$TARGET
+curl https://dl.geph.io/XGO_BUILD/geph-$1-android-16-386 > $X86_DIR/$TARGET

@@ -1,29 +1,22 @@
 package io.geph.android.api.models;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+
+import org.json.JSONObject;
 
 /**
  * @author j3sawyer
  */
 public class AccountInfo {
-    @SerializedName("Username")
-    private String username;
-
-    @SerializedName("AccID")
-    private String accId;
-
-    @SerializedName("Balance")
+    @SerializedName("FreeBalance")
     private String balance; // in MiB
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getAccId() {
-        return accId;
-    }
+    @SerializedName("PremiumInfo")
+    private JsonObject premiumInfo;
 
     public String getBalance() {
         return balance;
     }
+    public JsonObject getPremiumInfo() { return premiumInfo; }
 }

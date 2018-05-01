@@ -1,21 +1,33 @@
 package io.geph.android;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.DownloadManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +36,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.android.volley.RequestQueue;
 
 import java.io.IOException;
 
@@ -41,6 +55,9 @@ import io.geph.android.ui.RegistrationFragment;
 import io.geph.android.ui.SettingsActivity;
 import io.geph.android.ui.SimpleUiControl;
 
+import static io.geph.android.Constants.SP_LAST_BYTES_RX;
+import static io.geph.android.Constants.SP_LAST_BYTES_TX;
+import static io.geph.android.Constants.SP_LAST_UPDATED;
 import static io.geph.android.Constants.SP_PASSWORD;
 import static io.geph.android.Constants.SP_USERNAME;
 import static io.geph.android.ui.RegistrationFragment.CAPTCHA_ID_EXTRA;
@@ -118,12 +135,27 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mToolbar.setOnMenuItemClickListener(this);
     }
 
+    private static boolean updateScheduled = false;
+
+    private void scheduleUpdateJob(Context context) {
+        if (!updateScheduled) {
+            ComponentName serviceComponent = new ComponentName(context, UpdateJobService.class);
+            JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+            builder.setPeriodic(60 * 60 * 1000);
+            JobScheduler jobScheduler = (JobScheduler) context.getSystemService(JOB_SCHEDULER_SERVICE);
+            jobScheduler.schedule(builder.build());
+            Log.d(TAG, "JOB SCHEDULED!!!!!!!");
+            updateScheduled = true;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         bindActivity();
+        scheduleUpdateJob(getApplicationContext());
 
         if (findViewById(R.id.fragment_container) != null) {
             mUiHandler = new Handler();
@@ -179,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "destroy");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(vpnReceiver);
         unregisterReceiver(networkStateReceiver);
     }
@@ -304,6 +337,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         spEditString(SP_USERNAME, "");
         spEditString(SP_PASSWORD, "");
         spEditBoolean(IS_SIGNED_IN, false);
+
+        spRemove(SP_LAST_BYTES_RX);
+        spRemove(SP_LAST_BYTES_TX);
+        spRemove(SP_LAST_UPDATED);
 
         showLoginFragment();
     }
@@ -473,6 +510,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private void spEditBoolean(String key, boolean value) {
         SharedPreferences.Editor editor = getPrefEditor();
         editor.putBoolean(key, value);
+        editor.commit();
+    }
+
+    private void spRemove(String key) {
+        SharedPreferences.Editor editor = getPrefEditor();
+        editor.remove(key);
         editor.commit();
     }
 
