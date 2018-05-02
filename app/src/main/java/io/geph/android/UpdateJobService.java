@@ -45,7 +45,7 @@ public class UpdateJobService extends JobService {
                 try {
                     Context context = getApplicationContext();
                     JSONObject andObj = response.getJSONObject("Android");
-                    if (andObj.getString("Latest") != BuildConfig.VERSION_NAME) {
+                    if (!andObj.getString("Latest").equals(BuildConfig.VERSION_NAME)) {
                         // down&install intent
                         Intent diintent = new Intent(context, UpdateService.class);
                         JSONArray mirrs = andObj.getJSONArray("Mirrors");
