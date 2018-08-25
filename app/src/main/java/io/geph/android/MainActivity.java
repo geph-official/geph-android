@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         if (!BuildConfig.FLAVOR.equals("releasePlay") && !updateScheduled) {
             ComponentName serviceComponent = new ComponentName(context, UpdateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-            builder.setPeriodic(10 * 1000);
+            builder.setPeriodic(20 * 60 * 1000);
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(JOB_SCHEDULER_SERVICE);
             jobScheduler.schedule(builder.build());
             Log.d(TAG, "JOB SCHEDULED!!!!!!!!!!!!");
