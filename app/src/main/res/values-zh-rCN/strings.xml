@@ -57,4 +57,7 @@
     <string name="plan_type">帐户类型</string>
     <string name="unlimited">无限</string>
     <string name="free">免费</string>
+    <string name="buy_plus">购买无限流量</string>
+    <string name="manage_account">管理账户</string>
+    <string name="title_activity_billing">付费管理</string>
 </resources>

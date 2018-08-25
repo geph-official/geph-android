@@ -1,5 +1,7 @@
 package io.geph.android;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.job.JobParameters;
@@ -30,6 +32,20 @@ import org.json.JSONObject;
 public class UpdateJobService extends JobService {
     private static final String TAG = "UpdateJobService";
 
+    private String createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "geph_update";
+            String channelName = "Geph updates";
+            NotificationChannel chan = new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setDescription("Geph updates");
+            NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(chan);
+            return channelId;
+        }
+        return "";
+    }
+
     @Override
     public boolean onStartJob(JobParameters params) {
         final UpdateJobService currService = this;
@@ -53,7 +69,7 @@ public class UpdateJobService extends JobService {
                         diintent.setAction(mirrs.getString(0));
                         Log.d(TAG, diintent.getStringExtra("io.geph.android.downURL"));
                         PendingIntent diPendingIntent = PendingIntent.getService(context, 0, diintent, 0);
-                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, createNotificationChannel());
                         mBuilder.setSmallIcon(R.drawable.ic_stat_notification_icon)
                                 .setContentTitle(getString(R.string.update_notification))
                                 .setContentText(getString(R.string.download_and_install))

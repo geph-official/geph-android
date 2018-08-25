@@ -2,6 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="io.geph.android.ui.FeatureFragment">
     <item
+        android:id="@+id/billing"
+        android:orderInCategory="98"
+        android:title="@string/title_activity_billing" />
+    <item
         android:id="@+id/settings"
         android:orderInCategory="99"
         android:title="@string/settings" />

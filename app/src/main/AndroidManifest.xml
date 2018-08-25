@@ -14,10 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="io.geph.android.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,30 +25,28 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.SettingsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name="io.geph.android.UpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE">
-
-        </service>
-
+            android:name=".UpdateJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service android:name=".UpdateService" />
         <service
-            android:name="io.geph.android.UpdateService">
-
-        </service>
-
-        <service
-            android:name="io.geph.android.tun2socks.TunnelVpnService"
+            android:name=".tun2socks.TunnelVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".BillingActivity"
+            android:label="@string/title_activity_billing"
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

@@ -2,6 +2,8 @@ package io.geph.android.tun2socks;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -114,7 +116,8 @@ public class TunnelManager implements Tunnel.HostService {
         PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 0, notificationIntent, 0);
 
         Bitmap largeIcon = BitmapFactory.decodeResource(ctx.getResources(), R.mipmap.ic_launcher);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx)
+        String channelId = createNotificationChannel();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, createNotificationChannel())
                 .setSmallIcon(R.drawable.ic_stat_notification_icon)
                 .setLargeIcon(largeIcon)
                 .setWhen(System.currentTimeMillis())
@@ -128,6 +131,20 @@ public class TunnelManager implements Tunnel.HostService {
         getVpnService().startForeground(NOTIFICATION_ID, notification);
 
         return android.app.Service.START_NOT_STICKY;
+    }
+
+    private String createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "geph_service";
+            String channelName = "Geph background service";
+            NotificationChannel chan = new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setDescription("Geph background service");
+            NotificationManager notificationManager = getContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(chan);
+            return channelId;
+        }
+        return "";
     }
 
     private Process setupAndRunSocksProxyDaemon() {
@@ -186,15 +203,8 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(AccountUtils.getUsername(getContext()));
             commands.add("-pwd");
             commands.add(AccountUtils.getPassword(getContext()));
-            commands.add("-geodb");
-            commands.add(geoDb.getAbsolutePath());
 
             SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(getContext());
-            // conditionally enable whitelist option
-            if (spref.getBoolean(Constants.SETTINGS_WHITELIST, false)) {
-                commands.add("-whitelist");
-                commands.add("CN");
-            }
             // conditionally enable cache option
             if (spref.getBoolean(Constants.SETTINGS_CACHE, true)) {
                 commands.add("-cachedir");

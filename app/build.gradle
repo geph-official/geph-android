@@ -7,23 +7,30 @@ android {
         // but continue the build even when errors are found:
         abortOnError false
     }
-    compileSdkVersion 25
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 27
+    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId 'io.geph.android'
         minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 1
-        versionName "A003"
+        targetSdkVersion 27
+        versionCode 6
+        versionName "A006"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'armeabi', 'x86'
         }
     }
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        releaseAPK {
+
+        }
+
+        releasePlay {
+
+        }
+
+        debug {
+            debuggable true
         }
     }
     externalNativeBuild {
@@ -36,18 +43,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.4.0'
-    compile 'com.android.support:design:25.4.0'
-    compile 'com.android.support:recyclerview-v7:25.4.0'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile 'com.android.volley:volley:1.1.0'
-    testCompile 'junit:junit:4.12'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 }
 
 task copyGephBinaries(type: Copy) {
@@ -61,3 +67,6 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyGephBinaries)
     }
 }
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'

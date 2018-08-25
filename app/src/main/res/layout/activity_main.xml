@@ -14,24 +14,42 @@
         android:layout_height="85dp"
         android:fitsSystemWindows="true">
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/main_collapsing"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/background_dark"
-            android:fitsSystemWindows="true"
-            app:contentScrim="@color/black">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/main_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize" />
+            android:layout_height="match_parent">
 
             <RelativeLayout
                 android:id="@+id/main_toolbar_acc"
-                android:layout_width="wrap_content"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin">
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="24dp"
+                app:layout_collapseMode="pin"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <Button
+                    android:id="@+id/ulbutton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="45dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="35dp"
+                    android:backgroundTint="@color/colorAccent"
+                    android:fontFamily="sans-serif"
+                    android:text="@string/manage_account"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    tools:layout_editor_absoluteX="233dp"
+                    tools:layout_editor_absoluteY="21dp"
+                    tools:textAllCaps="false" />
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/main_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:layout_editor_absoluteY="85dp" />
 
                 <ImageView
                     android:id="@+id/main_toolbar_icon"
@@ -42,14 +60,26 @@
                     android:src="@drawable/logo" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@id/main_toolbar_icon"
+                    android:layout_width="96dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="11dp"
+                    android:layout_toEndOf="@+id/main_toolbar_icon"
                     android:text="@string/app_name"
                     android:textColor="@color/white"
                     android:textSize="23sp" />
+
             </RelativeLayout>
+
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/main_collapsing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/background_dark"
+            android:fitsSystemWindows="true"
+            app:contentScrim="@color/black">
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>

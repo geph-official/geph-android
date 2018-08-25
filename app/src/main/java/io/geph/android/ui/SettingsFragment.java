@@ -23,9 +23,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        if (s.equals(Constants.SETTINGS_WHITELIST)) {
-            ((SettingsListener) getActivity()).notifyRestartRequired(s, sharedPreferences.getBoolean(s, false));
-        }
     }
 
     @Override

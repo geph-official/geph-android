@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mProgress = findViewById(R.id.main_progress);
         mToolbar = (Toolbar) findViewById(R.id.main_toolbar);
 
-        setSupportActionBar(mToolbar);
+        //setSupportActionBar(mToolbar);
 
         mToolbar.inflateMenu(R.menu.menu_main);
         mToolbar.setOnMenuItemClickListener(this);
@@ -138,13 +139,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private static boolean updateScheduled = false;
 
     private void scheduleUpdateJob(Context context) {
-        if (!updateScheduled) {
+        if (!BuildConfig.FLAVOR.equals("releasePlay") && !updateScheduled) {
             ComponentName serviceComponent = new ComponentName(context, UpdateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-            builder.setPeriodic(60 * 60 * 1000);
+            builder.setPeriodic(10 * 1000);
             JobScheduler jobScheduler = (JobScheduler) context.getSystemService(JOB_SCHEDULER_SERVICE);
             jobScheduler.schedule(builder.build());
-            Log.d(TAG, "JOB SCHEDULED!!!!!!!");
+            Log.d(TAG, "JOB SCHEDULED!!!!!!!!!!!!");
             updateScheduled = true;
         }
     }
@@ -173,6 +174,18 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         connFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 
         registerReceiver(networkStateReceiver, connFilter);
+
+        Button button = findViewById(R.id.ulbutton);
+        button.setTransformationMethod(null);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent bintent = new Intent(v.getContext(), BillingActivity.class);
+                Bundle b = new Bundle();
+                b.putString("action", "/billing/dashboard");
+                bintent.putExtras(b);
+                startActivityForResult(bintent, REQUEST_CODE_SETTINGS);
+            }
+        });
     }
 
     @Override
@@ -538,6 +551,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.billing:
+                Intent bintent = new Intent(this, BillingActivity.class);
+                Bundle b = new Bundle();
+                b.putString("action", "/billing/dashboard");
+                bintent.putExtras(b);
+                startActivityForResult(bintent, REQUEST_CODE_SETTINGS);
+                break;
             case R.id.sign_out:
                 signOut();
                 break;
