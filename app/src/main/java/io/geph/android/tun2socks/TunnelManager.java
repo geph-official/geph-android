@@ -40,7 +40,6 @@ public class TunnelManager implements Tunnel.HostService {
     public static final String DNS_SERVER_PORT_EXTRA = "dnsServerPort";
 
     private static final String LOG_TAG = "TunnelManager";
-    private static final String GEO_DB_FILE_NAME = "ip-mappings.csv";
     private static final String CACHE_DIR_NAME = "geph";
     private static final String DAEMON_IN_NATIVELIB_DIR = "libgeph.so";
     private TunnelVpnService m_parentService = null;
@@ -181,35 +180,16 @@ public class TunnelManager implements Tunnel.HostService {
         final String daemonBinaryPath =
                 ctx.getApplicationInfo().nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR;
 
-        final String socksProxyDaemonCacheDirName = CACHE_DIR_NAME;
-
         try {
-            File socksProxyCacheDir = new File(ctx.getCacheDir(), socksProxyDaemonCacheDirName);
-            if (!(socksProxyCacheDir.exists() && socksProxyCacheDir.isDirectory())) {
-                socksProxyCacheDir.delete();
-                socksProxyCacheDir.mkdir();
-            }
-
-            File geoDb = new File(ctx.getFilesDir().getAbsolutePath() + "/" + GEO_DB_FILE_NAME);
-            if (!geoDb.exists()) {
-                FileUtils.copyFile(GEO_DB_FILE_NAME, geoDb.getAbsolutePath(), ctx);
-            }
-
             List<String> commands = new ArrayList<>();
             commands.add(daemonBinaryPath);
             commands.add("client");
-            commands.add("-powersave");
             commands.add("-uname");
             commands.add(AccountUtils.getUsername(getContext()));
             commands.add("-pwd");
             commands.add(AccountUtils.getPassword(getContext()));
 
             SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(getContext());
-            // conditionally enable cache option
-            if (spref.getBoolean(Constants.SETTINGS_CACHE, true)) {
-                commands.add("-cachedir");
-                commands.add(socksProxyCacheDir.getAbsolutePath());
-            }
 
             ProcessBuilder pb = new ProcessBuilder(commands);
 

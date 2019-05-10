@@ -1,9 +1,6 @@
 package io.geph.android;
 
-import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.AlarmManager;
-import android.app.DownloadManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
@@ -13,21 +10,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -38,9 +30,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import io.geph.android.api.models.Captcha;
 import io.geph.android.proxbinder.Proxbinder;
@@ -53,7 +44,6 @@ import io.geph.android.ui.FeatureFragment;
 import io.geph.android.ui.InvalidCredentialDialogFragment;
 import io.geph.android.ui.LoginFragment;
 import io.geph.android.ui.RegistrationFragment;
-import io.geph.android.ui.SettingsActivity;
 import io.geph.android.ui.SimpleUiControl;
 
 import static io.geph.android.Constants.SP_LAST_BYTES_RX;
@@ -179,11 +169,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         button.setTransformationMethod(null);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent bintent = new Intent(v.getContext(), BillingActivity.class);
-                Bundle b = new Bundle();
-                b.putString("action", "/billing/dashboard");
-                bintent.putExtras(b);
-                startActivityForResult(bintent, REQUEST_CODE_SETTINGS);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(billingUrl()));
+                browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(browserIntent);
             }
         });
     }
@@ -548,15 +536,25 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         }
     }
 
+    private String billingUrl() {
+        try {
+            return "https://geph.io/billing/login?uname=" +
+                    URLEncoder.encode(AccountUtils.getUsername(this), "utf-8") + "&pwd=" +
+                    URLEncoder.encode(AccountUtils.getPassword(this), "utf-8") +
+                    "&next=" + URLEncoder.encode("/billing/dashboard", "utf-8");
+        } catch(Exception e) {
+            Log.d(TAG, "wat");
+            return "";
+        }
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.billing:
-                Intent bintent = new Intent(this, BillingActivity.class);
-                Bundle b = new Bundle();
-                b.putString("action", "/billing/dashboard");
-                bintent.putExtras(b);
-                startActivityForResult(bintent, REQUEST_CODE_SETTINGS);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(billingUrl()));
+                browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(browserIntent);
                 break;
             case R.id.sign_out:
                 signOut();
@@ -565,10 +563,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                 AboutDialogFragment dialog = new AboutDialogFragment();
                 dialog.show(getSupportFragmentManager(), "about");
                 break;
-            case R.id.settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivityForResult(intent, REQUEST_CODE_SETTINGS);
-                break;
+//            case R.id.settings:
+//                Intent intent = new Intent(this, SettingsActivity.class);
+//                startActivityForResult(intent, REQUEST_CODE_SETTINGS);
+//                break;
         }
         return true;
     }

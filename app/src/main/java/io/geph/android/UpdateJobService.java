@@ -37,7 +37,7 @@ public class UpdateJobService extends JobService {
             String channelId = "geph_update";
             String channelName = "Geph updates";
             NotificationChannel chan = new NotificationChannel(channelId,
-                    channelName, NotificationManager.IMPORTANCE_NONE);
+                    channelName, NotificationManager.IMPORTANCE_HIGH);
             chan.setDescription("Geph updates");
             NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(chan);
@@ -61,6 +61,7 @@ public class UpdateJobService extends JobService {
                 try {
                     Context context = getApplicationContext();
                     JSONObject andObj = response.getJSONObject("Android");
+                    Log.d(TAG, andObj.getString("Latest"));
                     if (!andObj.getString("Latest").equals(BuildConfig.VERSION_NAME)) {
                         // down&install intent
                         Intent diintent = new Intent(context, UpdateService.class);
