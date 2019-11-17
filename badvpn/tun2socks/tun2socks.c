@@ -416,21 +416,22 @@ void PsiphonLog(const char *levelStr, const char *channelStr, const char *msgStr
     {
         return;
     }
+    //printf("%s / %s / %s\n", levelStr, channelStr, msgStr);
     // Note: we could cache the class and method references if log is called frequently
 
-    jstring level = (*g_env)->NewStringUTF(g_env, levelStr);
-    jstring channel = (*g_env)->NewStringUTF(g_env, channelStr);
-    jstring msg = (*g_env)->NewStringUTF(g_env, msgStr);
+    //jstring level = (*g_env)->NewStringUTF(g_env, levelStr);
+    //jstring channel = (*g_env)->NewStringUTF(g_env, channelStr);
+    //jstring msg = (*g_env)->NewStringUTF(g_env, msgStr);
 
-    jclass cls = (*g_env)->FindClass(g_env, "io/geph/android/tun2socks/Tun2SocksJni");
-    jmethodID logMethod = (*g_env)->GetStaticMethodID(g_env, cls, "logTun2Socks", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    (*g_env)->CallStaticVoidMethod(g_env, cls, logMethod, level, channel, msg);
+    //jclass cls = (*g_env)->FindClass(g_env, "io/geph/android/tun2socks/Tun2SocksJni");
+    //jmethodID logMethod = (*g_env)->GetStaticMethodID(g_env, cls, "logTun2Socks", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+    //(*g_env)->CallStaticVoidMethod(g_env, cls, logMethod, level, channel, msg);
 
-    (*g_env)->DeleteLocalRef(g_env, cls);
+    //(*g_env)->DeleteLocalRef(g_env, cls);
 
-    (*g_env)->DeleteLocalRef(g_env, level);
-    (*g_env)->DeleteLocalRef(g_env, channel);
-    (*g_env)->DeleteLocalRef(g_env, msg);
+    //(*g_env)->DeleteLocalRef(g_env, level);
+    //(*g_env)->DeleteLocalRef(g_env, channel);
+    //(*g_env)->DeleteLocalRef(g_env, msg);
 }
 
 JNIEXPORT jint JNICALL Java_io_geph_android_tun2socks_Tun2SocksJni_runTun2Socks(

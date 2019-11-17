@@ -183,11 +183,15 @@ public class TunnelManager implements Tunnel.HostService {
         try {
             List<String> commands = new ArrayList<>();
             commands.add(daemonBinaryPath);
-            commands.add("client");
-            commands.add("-uname");
+            commands.add("-username");
             commands.add(AccountUtils.getUsername(getContext()));
-            commands.add("-pwd");
+            commands.add("-password");
             commands.add(AccountUtils.getPassword(getContext()));
+            commands.add("-exitName");
+            commands.add(AccountUtils.getExit(getContext()));
+            commands.add("-exitKey");
+            commands.add(AccountUtils.getExitKey(getContext()));
+
 
             SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(getContext());
 

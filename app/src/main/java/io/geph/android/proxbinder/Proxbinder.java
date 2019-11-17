@@ -13,13 +13,11 @@ public class Proxbinder {
     private String TAG;
     private int id;
     private Process proc;
-    private GephService service;
     private Thread loggingThread;
 
-    public Proxbinder(int _id, Process _proc, GephService _service) {
+    public Proxbinder(int _id, Process _proc) {
         id = _id;
         proc = _proc;
-        service = _service;
         TAG = "Proxbinder-" + _id;
 
         loggingThread = new Thread(new Runnable() {
@@ -35,14 +33,13 @@ public class Proxbinder {
         loggingThread.start();
     }
 
-    public GephService getService() {
-        return service;
+    public int PID() {
+        return id;
     }
 
     public void close() {
         proc.destroy();
         proc = null;
-        service = null;
         try {
             loggingThread.join();
         } catch (InterruptedException e) {

@@ -20,7 +20,7 @@ public class ProxbinderFactory {
     public static Proxbinder getProxbinder(Context context) {
         final String daemonBinaryPath =
                 context.getApplicationInfo().nativeLibraryDir + "/libgeph.so";
-        ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "proxbinder");
+        ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "-binderProxy", "127.0.0.1:23456");
         final Process proc;
         try {
             proc = pb.start();
@@ -29,16 +29,6 @@ public class ProxbinderFactory {
             return null;
         }
 
-        String tempProxBinderDest = "";
-        Scanner read = new Scanner(proc.getInputStream());
-        while (read.hasNextLine()) {
-            tempProxBinderDest = read.nextLine();
-            if (!tempProxBinderDest.isEmpty()) break;
-        }
-        read.close();
-
-        GephService service = GephServiceFactory.getService("http://" + tempProxBinderDest);
-
-        return new Proxbinder(counter.incrementAndGet(), proc, service);
+        return new Proxbinder(counter.incrementAndGet(), proc);
     }
 }

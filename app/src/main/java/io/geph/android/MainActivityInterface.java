@@ -7,9 +7,4 @@ package io.geph.android;
 public interface MainActivityInterface {
     void startVpn();
     void stopVpn();
-    void signIn(String username, String password);
-    void signOut();
-    void showProgressBar();
-    void dismissProgressBar();
-    void finishRegistration();
 }

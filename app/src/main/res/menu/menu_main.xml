@@ -1,8 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="io.geph.android.ui.FeatureFragment">
-    <item
-        android:id="@+id/about"
-        android:orderInCategory="101"
-        android:title="@string/about" />
-</menu>

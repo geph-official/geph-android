@@ -23,6 +23,15 @@ public class AccountUtils {
                 .getString(Constants.SP_PASSWORD, null);
     }
 
+    public static String getExit(Context context) {
+        return getSharedPreferences(context)
+                .getString(Constants.SP_EXIT, null);
+    }
+
+    public static String getExitKey(Context context) {
+        return getSharedPreferences(context)
+                .getString(Constants.SP_EXITKEY, null);
+    }
     public static boolean isSignedIn(Context context) {
         return getSharedPreferences(context)
                 .getBoolean(Constants.SP_IS_SIGNED_IN, false);

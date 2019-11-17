@@ -13,6 +13,8 @@ public class Constants {
 
     public static final String SP_USERNAME = "username";
     public static final String SP_PASSWORD = "password";
+    public static final String SP_EXIT = "exit";
+    public static final String SP_EXITKEY = "exitkey";
 
     public static final String SP_LAST_BYTES_TX = "last_bytes_tx";
     public static final String SP_LAST_BYTES_RX = "last_bytes_rx";

@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
+import android.util.Log;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 
@@ -255,6 +256,10 @@ public class Tunnel {
                         new Runnable() {
                             @Override
                             public void run() {
+                                Log.d("Tunnel", "vpnIpAddress = " + vpnIpAddress);
+                                Log.d("Tunnel", "vpnNetMask = " + vpnNetMask);
+                                Log.d("Tunnel", "socksServerAddress = " + socksServerAddress);
+                                Log.d("Tunnel", "dnsServerAddress = " + dnsServerAddress);
                                 Tun2SocksJni.runTun2Socks(
                                         vpnInterfaceFileDescriptor.getFd(),
                                         vpnInterfaceMTU,
