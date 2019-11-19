@@ -30,6 +30,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,6 +101,37 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mWebView.addJavascriptInterface(this, "Android");
 
         mWebView.loadUrl("file:///android_asset/htmlbuild/index.html");
+    }
+
+    @JavascriptInterface
+    public final void jsCheckAccount(final String uname, final String pwd, final String cbackString) {
+        final Context ctx = this.getApplicationContext();
+        new Thread(new Runnable() {
+            public void run() {
+                final String daemonBinaryPath =
+                        ctx.getApplicationInfo().nativeLibraryDir + "/libgeph.so";
+                ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "-loginCheck",
+                        "-username", uname,
+                        "-password", pwd);
+                Log.e(TAG, "START CHECK");
+                final Process proc;
+                Integer retcode;
+                try {
+                    proc = pb.start();
+                    retcode = proc.waitFor();
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                    retcode = -1;
+                }
+                Log.e(TAG, cbackString + retcode);
+                final Integer lala = retcode;
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        mWebView.loadUrl("javascript:" + cbackString + "(" + lala + ");void(0);");
+                    }
+                });
+            }
+        }).start();
     }
 
     // JS interfaces
