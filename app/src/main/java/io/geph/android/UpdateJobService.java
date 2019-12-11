@@ -52,7 +52,7 @@ public class UpdateJobService extends JobService {
         final JobParameters jparams = params;
         Log.d(TAG, "JOB STARTED");
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://raw.githubusercontent.com/rensa-labs/geph-autoupdate/master/stable.json";
+        String url = "https://gitlab.com/bunsim/geph-autoupdate/raw/master/stable.json";
         JsonObjectRequest stringRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 url, null, new Response.Listener<JSONObject>() {
