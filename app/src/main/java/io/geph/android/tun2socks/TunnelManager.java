@@ -191,6 +191,9 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(AccountUtils.getExit(getContext()));
             commands.add("-exitKey");
             commands.add(AccountUtils.getExitKey(getContext()));
+            if (AccountUtils.getExperimentalTCP(getContext())) {
+                commands.add("-useExperimentalTCP");
+            }
 
 
             SharedPreferences spref = PreferenceManager.getDefaultSharedPreferences(getContext());

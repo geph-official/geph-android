@@ -16,6 +16,8 @@ public class Constants {
     public static final String SP_EXIT = "exit";
     public static final String SP_EXITKEY = "exitkey";
 
+    public static final String SP_TCP = "tcp";
+
     public static final String SP_LAST_BYTES_TX = "last_bytes_tx";
     public static final String SP_LAST_BYTES_RX = "last_bytes_rx";
     public static final String SP_LAST_UPDATED = "last_updated";
