@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mWebView.addJavascriptInterface(this, "Android");
 
         mWebView.loadUrl("file:///android_asset/htmlbuild/index.html");
+        //mWebView.loadUrl("http://10.0.2.2:8100/");
     }
 
     @JavascriptInterface
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private static boolean updateScheduled = false;
 
     private void scheduleUpdateJob(Context context) {
-        if (!BuildConfig.FLAVOR.equals("releasePlay") && !updateScheduled) {
+        if (!BuildConfig.BUILD_VARIANT.equals("play") && !updateScheduled) {
             ComponentName serviceComponent = new ComponentName(context, UpdateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
             builder.setPeriodic(20 * 60 * 1000);
