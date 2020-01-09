@@ -160,13 +160,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         jsShowToast("stopped proxbinder " + pid);
     }
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String exitKey, String useExperimentalTCP) {
+    public void jsStartDaemon(String uname, String pwd, String exitName, String exitKey, String useTCP, String forceBridges) {
         SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
         prefs.edit().putString(Constants.SP_USERNAME, uname)
                 .putString(Constants.SP_PASSWORD, pwd)
                 .putString(Constants.SP_EXIT, exitName)
                 .putString(Constants.SP_EXITKEY, exitKey)
-                .putBoolean(Constants.SP_TCP, useExperimentalTCP.equals("true")).apply();
+                .putBoolean(Constants.SP_TCP, useTCP.equals("true"))
+                .putBoolean(Constants.SP_FORCEBRIDGES, forceBridges.equals("true")).apply();
         startVpn();
     }
     @JavascriptInterface

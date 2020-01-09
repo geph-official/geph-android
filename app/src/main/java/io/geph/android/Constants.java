@@ -17,6 +17,7 @@ public class Constants {
     public static final String SP_EXITKEY = "exitkey";
 
     public static final String SP_TCP = "tcp";
+    public static final String SP_FORCEBRIDGES = "forcebridges";
 
     public static final String SP_LAST_BYTES_TX = "last_bytes_tx";
     public static final String SP_LAST_BYTES_RX = "last_bytes_rx";

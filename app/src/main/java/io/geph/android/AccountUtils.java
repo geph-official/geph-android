@@ -28,10 +28,16 @@ public class AccountUtils {
                 .getString(Constants.SP_EXIT, null);
     }
 
-    public static Boolean getExperimentalTCP(Context context) {
+    public static Boolean getTCP(Context context) {
         return getSharedPreferences(context)
                 .getBoolean(Constants.SP_TCP, false);
     }
+
+    public static Boolean getForceBridges(Context context) {
+        return getSharedPreferences(context)
+                .getBoolean(Constants.SP_FORCEBRIDGES, false);
+    }
+
 
     public static String getExitKey(Context context) {
         return getSharedPreferences(context)

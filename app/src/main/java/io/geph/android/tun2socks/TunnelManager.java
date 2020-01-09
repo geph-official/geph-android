@@ -16,7 +16,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,8 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.geph.android.AccountUtils;
-import io.geph.android.Constants;
-import io.geph.android.FileUtils;
 import io.geph.android.MainActivity;
 import io.geph.android.R;
 
@@ -191,8 +188,11 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(AccountUtils.getExit(getContext()));
             commands.add("-exitKey");
             commands.add(AccountUtils.getExitKey(getContext()));
-            if (AccountUtils.getExperimentalTCP(getContext())) {
-                commands.add("-useExperimentalTCP");
+            if (AccountUtils.getTCP(getContext())) {
+                commands.add("-useTCP");
+            }
+            if (AccountUtils.getForceBridges(getContext())) {
+                commands.add("-forceBridges");
             }
 
 
