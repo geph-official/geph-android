@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol } = require("electron");
+const { app, BrowserWindow, Tray } = require("electron");
 const path = require("path");
 const url = require("url");
 const isDev = require("electron-is-dev");
@@ -7,6 +7,8 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
+
+const gotTheLock = app.requestSingleInstanceLock();
 
 function createWindow() {
   // Create the browser window.
@@ -18,7 +20,11 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false
-    }
+    },
+    show: false
+  });
+  win.once("ready-to-show", () => {
+    win.show();
   });
   win.setMenuBarVisibility(false);
   win.webContents.on("new-window", function(event, url) {
@@ -60,10 +66,39 @@ function createWindow() {
   });
 }
 
+if (!gotTheLock) {
+  app.quit();
+  return;
+}
+app.on("second-instance", (event, commandLine, workingDirectory) => {
+  // Someone tried to run a second instance, we should focus our window.
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.show();
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+let tray = null;
+app.on("ready", () => {
+  createWindow();
+  tray = new Tray(app.getAppPath() + "/icons/512x512.png");
+  tray.on("click", _ => {
+    console.log("win.isVisible() = " + win.isVisible());
+    if (win.isVisible()) {
+      win.hide();
+    } else {
+      console.log("win.isMinimized() = " + win.isMinimized());
+      if (win.isMinimized()) {
+        win.restore();
+        win.focus();
+      }
+      win.show();
+    }
+  });
+});
 
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
@@ -77,21 +112,3 @@ app.on("activate", () => {
     createWindow();
   }
 });
-
-// // In this file you can include the rest of your app's specific main process
-// // code. You can also put them in separate files and require them here.
-// app.on("ready", () => {
-//   protocol.interceptFileProtocol(
-//     "file",
-//     (request, callback) => {
-//       console.log(request.url)
-//       const url = request.url.substr(7); /* all urls start with 'file://' */
-//       callback({
-//         path: path.normalize(`${__dirname}/${url}`)
-//       });
-//     },
-//     err => {
-//       if (err) console.error("Failed to register protocol");
-//     }
-//   );
-// });
