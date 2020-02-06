@@ -137,7 +137,7 @@ public class Tunnel {
     //
     // Calling addDisallowedApplication on VPNService.Builder requires API 21 (Lollipop).
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private boolean startVpn() throws Exception {
+    private synchronized boolean startVpn() throws Exception {
         mPrivateAddress = selectPrivateAddress();
 
         Locale previousLocale = Locale.getDefault();
@@ -186,7 +186,7 @@ public class Tunnel {
         return true;
     }
 
-    private boolean routeThroughTunnel(String socksServerAddress, String dnsServerAddress) {
+    private synchronized  boolean routeThroughTunnel(String socksServerAddress, String dnsServerAddress) {
         if (!mRoutingThroughTunnel.compareAndSet(false, true)) {
             return false;
         }
@@ -212,18 +212,11 @@ public class Tunnel {
         return true;
     }
 
-    private void stopRoutingThroughTunnel() {
+    private synchronized void stopRoutingThroughTunnel() {
         stopTun2Socks();
     }
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void protectSocket(long fileDescriptor) {
-        if (!((VpnService) mHostService.getVpnService()).protect((int) fileDescriptor)) {
-            mHostService.onDiagnosticMessage("protect socket failed");
-        }
-    }
-
-    private void stopVpn() {
+    private synchronized  void stopVpn() {
         stopTun2Socks();
         ParcelFileDescriptor tunFd = mTunFd.getAndSet(null);
         if (tunFd != null) {

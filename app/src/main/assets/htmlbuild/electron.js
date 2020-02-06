@@ -84,7 +84,7 @@ app.on("second-instance", (event, commandLine, workingDirectory) => {
 let tray = null;
 app.on("ready", () => {
   createWindow();
-  tray = new Tray(app.getAppPath() + "/icons/512x512.png");
+  tray = new Tray(app.getAppPath() + "/icons/tray.png");
   tray.on("click", _ => {
     console.log("win.isVisible() = " + win.isVisible());
     if (win.isVisible()) {
