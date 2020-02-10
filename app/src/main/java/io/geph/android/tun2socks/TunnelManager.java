@@ -76,12 +76,6 @@ public class TunnelManager implements Tunnel.HostService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOG_TAG, "onStartCommand");
 
-        if (setupAndRunSocksProxyDaemon() == null) {
-            Log.e(LOG_TAG, "Failed to start the socks proxy daemon.");
-            m_parentService.broadcastVpnStart(false /* success */);
-            return 0;
-        }
-
         mSocksServerAddressBase = intent.getStringExtra(SOCKS_SERVER_ADDRESS_BASE);
         mSocksServerPort = intent.getStringExtra(SOCKS_SERVER_PORT_EXTRA);
         mSocksServerAddress = mSocksServerAddressBase + ":" + mSocksServerPort;
@@ -125,6 +119,11 @@ public class TunnelManager implements Tunnel.HostService {
 
         // starting this service on foreground to avoid accidental GC by Android system
         getVpnService().startForeground(NOTIFICATION_ID, notification);
+        if (setupAndRunSocksProxyDaemon() == null) {
+            Log.e(LOG_TAG, "Failed to start the socks proxy daemon.");
+            m_parentService.broadcastVpnStart(false /* success */);
+            return 0;
+        }
 
         return android.app.Service.START_NOT_STICKY;
     }
@@ -159,11 +158,6 @@ public class TunnelManager implements Tunnel.HostService {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     Log.e(tag, line);
-                    if (line.contains("FATAL")) {
-                        Log.e(tag, "Stopping the service due to invalid credential");
-                        m_parentService.broadcastVpnDisconnect(TunnelVpnService.TUNNEL_VPN_STOP_INVALID_CREDENTIAL);
-                        break;
-                    }
                 }
             }
         });
@@ -188,6 +182,10 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(AccountUtils.getExit(getContext()));
             commands.add("-exitKey");
             commands.add(AccountUtils.getExitKey(getContext()));
+            commands.add("-socksAddr");
+            commands.add(mSocksServerAddress);
+            commands.add("-dnsAddr");
+            commands.add(mDnsResolverAddress);
             if (AccountUtils.getTCP(getContext())) {
                 commands.add("-useTCP");
             }
@@ -251,30 +249,31 @@ public class TunnelManager implements Tunnel.HostService {
     public void signalStopService() {
         if (m_tunnelThreadStopSignal != null) {
             m_tunnelThreadStopSignal.countDown();
+            stopSocksProxy();
         }
     }
 
     // Stops the tunnel thread and restarts it with |socksServerAddress|.
-    public void restartTunnel(final String socksServerAddress, String socksServerPort, String dnsServerPort) {
-        Log.i(LOG_TAG, "Restarting tunnel.");
-        if (socksServerAddress == null ||
-                socksServerAddress.equals(mSocksServerAddress)) {
-            // Don't reconnect if the socks server address hasn't changed.
-            m_parentService.broadcastVpnStart(true /* success */);
-            return;
-        }
-        mSocksServerAddress = socksServerAddress;
-        mSocksServerPort = socksServerPort;
-        mDnsServerPort = dnsServerPort;
-
-        m_isReconnecting.set(true);
-
-        // Signaling stopUi to the tunnel thread with the reconnect flag set causes
-        // the thread to stopUi the tunnel (but not the VPN or the service) and send
-        // the new SOCKS server address to the DNS resolver before exiting itself.
-        // When the DNS broadcasts its local address, the tunnel will restart.
-        signalStopService();
-    }
+//    public void restartTunnel(final String socksServerAddress, String socksServerPort, String dnsServerPort) {
+//        Log.i(LOG_TAG, "Restarting tunnel.");
+//        if (socksServerAddress == null ||
+//                socksServerAddress.equals(mSocksServerAddress)) {
+//            // Don't reconnect if the socks server address hasn't changed.
+//            m_parentService.broadcastVpnStart(true /* success */);
+//            return;
+//        }
+//        mSocksServerAddress = socksServerAddress;
+//        mSocksServerPort = socksServerPort;
+//        mDnsServerPort = dnsServerPort;
+//
+//        m_isReconnecting.set(true);
+//
+//        // Signaling stopUi to the tunnel thread with the reconnect flag set causes
+//        // the thread to stopUi the tunnel (but not the VPN or the service) and send
+//        // the new SOCKS server address to the DNS resolver before exiting itself.
+//        // When the DNS broadcasts its local address, the tunnel will restart.
+//        signalStopService();
+//    }
 
     private void startTunnel() {
         m_tunnelThreadStopSignal = new CountDownLatch(1);

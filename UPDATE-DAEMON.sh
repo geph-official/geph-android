@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export PREFIX="https://binaries.geph.io"
-export VERSION="v0.17.0"
+export VERSION="v0.17.2"
 
 PREBUILD="./prebuild"
 # ABI names must match with arguments provided to android.defaultConfig.ndk.abiFilters
@@ -19,3 +19,6 @@ curl "$PREFIX/geph-client-linux-armeabi-$VERSION" > $ARM_DIR/$TARGET
 curl "$PREFIX/geph-client-linux-arm64-$VERSION" > $ARM64_DIR/$TARGET
 curl "$PREFIX/geph-client-linux-i386-$VERSION" > $X86_DIR/$TARGET
 curl "$PREFIX/geph-client-linux-amd64-$VERSION" > $X86_64_DIR/$TARGET
+cd $PREBUILD
+#chmod +x */*
+#upx */*

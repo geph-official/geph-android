@@ -55,9 +55,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     /**
      * Testing values
      */
-    private static final String mSocksServerAddress = "localhost";
-    private static final String mSocksServerPort = "9909";
-    private static final String mDnsServerPort = "9983";
+    private static final String mSocksServerAddress = "127.0.0.1";
+    private static final String mSocksServerPort = ((Integer)(int)(Math.random() * 1000 + 60000)).toString();
+    private static final String mDnsServerPort = ((Integer)(int)(Math.random() * 1000 + 50000)).toString();
 
     private static final String FRONT = "front";
     private static final long TOOLBAR_ACC_ANIM_DURATION = 500;
@@ -228,6 +228,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         super.onDestroy();
         Log.d(TAG, "destroy");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(vpnReceiver);
+        if (!isServiceRunning()) {
+            System.exit(0);
+        }
     }
 
     protected void prepareAndStartTunnelService() {
@@ -281,9 +284,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         if (isServiceRunning()) {
             Log.d(TAG, "already running service");
             TunnelManager tunnelManager = TunnelState.getTunnelState().getTunnelManager();
-            if (tunnelManager != null) {
-                tunnelManager.restartTunnel(mSocksServerAddress, mSocksServerPort, mDnsServerPort);
-            }
+//            if (tunnelManager != null) {
+//                tunnelManager.restartTunnel(mSocksServerAddress, mSocksServerPort, mDnsServerPort);
+//            }
             return;
         }
         Intent startTunnelVpn = new Intent(context, TunnelVpnService.class);
@@ -291,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort);
         startTunnelVpn.putExtra(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort);
         if (startService(startTunnelVpn) == null) {
-            Log.d(TAG, "failed to start tunnel vpn service");
+            Toast.makeText(this, "failed to start tunnel vpn service", Toast.LENGTH_SHORT).show();
             return;
         }
         TunnelState.getTunnelState().setStartingTunnelManager();
@@ -326,12 +329,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     @Override
     public void stopVpn() {
+        Intent stopTunnelVpn = new Intent(this, TunnelVpnService.class);
+        stopService(stopTunnelVpn);
         Log.e(TAG, "** ATTEMPTING STOP **");
         TunnelManager currentTunnelManager = TunnelState.getTunnelState().getTunnelManager();
         if (currentTunnelManager != null) {
             currentTunnelManager.signalStopService();
         } else {
-            Log.e(TAG, "cannot stop because null!");
+            Toast.makeText(this, "cannot properly stop VPN!!!", Toast.LENGTH_SHORT).show();
         }
     }
 

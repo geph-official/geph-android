@@ -19,8 +19,8 @@ public class Tun2SocksJni {
 
     public static native int terminateTun2Socks();
 
-    public static void logTun2Socks(String level, String channel, String msg) {
-        String logMsg = String.format("%s (%s): %s", level, channel, msg);
+    public static void logTun2Socks(String channel, String msg) {
+        String logMsg = String.format("(%s): %s", channel, msg);
         Log.i("Bridge", logMsg);
     }
 }

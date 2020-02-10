@@ -13,6 +13,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.spec.ECField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ public class Tunnel {
     // Only one VpnService instance may exist at a time, as the underlying
     // tun2socks implementation contains global state.
     private static Tunnel mTunnel;
+    private ParcelFileDescriptor tunFd;
     private final HostService mHostService;
     private PrivateAddress mPrivateAddress;
     private AtomicReference<ParcelFileDescriptor> mTunFd;
@@ -36,7 +38,6 @@ public class Tunnel {
 
     private Tunnel(HostService hostService) {
         mHostService = hostService;
-        mTunFd = new AtomicReference<>();
         mRoutingThroughTunnel = new AtomicBoolean(false);
     }
 
@@ -55,46 +56,8 @@ public class Tunnel {
     // To startUi, call in sequence: startRouting(), then startTunneling(). After startRouting()
     // succeeds, the caller must call stopUi() to clean up.
 
-    private static PrivateAddress selectPrivateAddress() throws Exception {
-        // Select one of 10.0.0.1, 172.16.0.1, or 192.168.0.1 depending on
-        // which private address range isn't in use.
-        Map<String, PrivateAddress> candidates = new HashMap<String, PrivateAddress>();
-        candidates.put("10", new PrivateAddress("10.0.0.1", "10.0.0.0", 8, "10.0.0.2"));
-        candidates.put("172", new PrivateAddress("172.16.0.1", "172.16.0.0", 12, "172.16.0.2"));
-        candidates.put("192", new PrivateAddress("192.168.0.1", "192.168.0.0", 16, "192.168.0.2"));
-        candidates.put("169", new PrivateAddress("169.254.1.1", "169.254.1.0", 24, "169.254.1.2"));
-
-        List<NetworkInterface> netInterfaces;
-        try {
-            netInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-        } catch (SocketException e) {
-            e.printStackTrace();
-            throw new Exception("selectPrivateAddress failed", e);
-        }
-
-        for (NetworkInterface netInterface : netInterfaces) {
-            for (InetAddress inetAddress : Collections.list(netInterface.getInetAddresses())) {
-
-                if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
-                    String ipAddress = inetAddress.getHostAddress();
-                    if (ipAddress.startsWith("10.")) {
-                        candidates.remove("10");
-                    } else if (ipAddress.length() >= 6
-                            && ipAddress.substring(0, 6).compareTo("172.16") >= 0
-                            && ipAddress.substring(0, 6).compareTo("172.31") <= 0) {
-                        candidates.remove("172");
-                    } else if (ipAddress.startsWith("192.168")) {
-                        candidates.remove("192");
-                    }
-                }
-            }
-        }
-
-        if (candidates.size() > 0) {
-            return candidates.values().iterator().next();
-        }
-
-        throw new Exception("no private address available");
+    private static PrivateAddress selectPrivateAddress() {
+        return new PrivateAddress("10.81.4.1", "10.81.4.0", 24, "10.81.4.2");
     }
 
     public Object clone() throws CloneNotSupportedException {
@@ -138,6 +101,7 @@ public class Tunnel {
     // Calling addDisallowedApplication on VPNService.Builder requires API 21 (Lollipop).
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private synchronized boolean startVpn() throws Exception {
+        mHostService.onDiagnosticMessage("startVpn()");
         mPrivateAddress = selectPrivateAddress();
 
         Locale previousLocale = Locale.getDefault();
@@ -147,7 +111,7 @@ public class Tunnel {
             // Workaround for https://code.google.com/p/android/issues/detail?id=61096
             Locale.setDefault(new Locale("en"));
 
-            ParcelFileDescriptor tunFd = null;
+            tunFd = null;
             try {
                 tunFd =
                         ((VpnService.Builder) mHostService.newVpnServiceBuilder())
@@ -168,7 +132,6 @@ public class Tunnel {
                 // this application is no longer prepared or was revoked.
                 return false;
             }
-            mTunFd.set(tunFd);
             mRoutingThroughTunnel.set(false);
             mHostService.onVpnEstablished();
 
@@ -190,7 +153,6 @@ public class Tunnel {
         if (!mRoutingThroughTunnel.compareAndSet(false, true)) {
             return false;
         }
-        ParcelFileDescriptor tunFd = mTunFd.get();
         if (tunFd == null) {
             return false;
         }
@@ -212,19 +174,25 @@ public class Tunnel {
         return true;
     }
 
-    private synchronized void stopRoutingThroughTunnel() {
+    private void stopRoutingThroughTunnel() {
         stopTun2Socks();
     }
 
-    private synchronized  void stopVpn() {
+    private synchronized void stopVpn() {
         stopTun2Socks();
-        ParcelFileDescriptor tunFd = mTunFd.getAndSet(null);
         if (tunFd != null) {
             try {
                 mHostService.onDiagnosticMessage("closing VPN interface");
+                Thread.sleep(100);
                 tunFd.close();
+                tunFd = null;
+            } catch (InterruptedException e) {
+                System.exit(-1);
             } catch (IOException e) {
+                System.exit(-1);
             }
+        } else {
+            mHostService.onDiagnosticMessage("tried to stop already stopped!");
         }
     }
 
@@ -253,6 +221,7 @@ public class Tunnel {
                                 Log.d("Tunnel", "vpnNetMask = " + vpnNetMask);
                                 Log.d("Tunnel", "socksServerAddress = " + socksServerAddress);
                                 Log.d("Tunnel", "dnsServerAddress = " + dnsServerAddress);
+                                Log.d("Tunnel", "FD = " + vpnInterfaceFileDescriptor.getFd());
                                 Tun2SocksJni.runTun2Socks(
                                         vpnInterfaceFileDescriptor.getFd(),
                                         vpnInterfaceMTU,
@@ -261,6 +230,7 @@ public class Tunnel {
                                         socksServerAddress,
                                         dnsServerAddress,
                                         transparentDns ? 1 : 0);
+                                Log.e("Tunnel", "runTun2Socks returned?!");
                             }
                         });
         mTun2SocksThread.start();
@@ -269,11 +239,12 @@ public class Tunnel {
 
     private void stopTun2Socks() {
         if (mTun2SocksThread != null) {
+            int rval = Tun2SocksJni.terminateTun2Socks();
+            mHostService.onDiagnosticMessage("terminateTun2Socks() returned " + rval);
             try {
-                Tun2SocksJni.terminateTun2Socks();
                 mTun2SocksThread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            }catch(InterruptedException e) {
+
             }
             mTun2SocksThread = null;
             mRoutingThroughTunnel.set(false);
@@ -290,12 +261,11 @@ public class Tunnel {
 
         public Context getContext();
 
-        // Object must be a VpnService; Android < 4 cannot reference this class name
-        public Object getVpnService();
+        // Object must be a VpnService
+        public VpnService getVpnService();
 
         // Object must be a VpnService.Builder;
-        // Android < 4 cannot reference this class name
-        public Object newVpnServiceBuilder();
+        public VpnService.Builder newVpnServiceBuilder();
 
         public void onDiagnosticMessage(String message);
 
