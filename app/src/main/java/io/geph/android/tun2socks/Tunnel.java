@@ -271,6 +271,8 @@ public class Tunnel {
         if (mTun2SocksThread != null) {
             try {
                 Tun2SocksJni.terminateTun2Socks();
+                Thread.sleep(200);
+                mTun2SocksThread.interrupt();
                 mTun2SocksThread.join();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

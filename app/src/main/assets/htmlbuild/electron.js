@@ -44,7 +44,7 @@ function createWindow() {
 
   // and load the index.html of the app.
   if (isDev) {
-    win.loadURL("http://localhost:8100/");
+    win.loadURL("http://localhost:3000/");
     win.setResizable(true);
     win.toggleDevTools();
   } else {
