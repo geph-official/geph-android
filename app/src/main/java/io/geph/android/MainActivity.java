@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
      */
     private static final String mSocksServerAddress = "localhost";
     private static final String mSocksServerPort = "9909";
-    private static final String mDnsServerPort = "9983";
+    private static final String mDnsServerPort = "49983";
 
     private static final String FRONT = "front";
     private static final long TOOLBAR_ACC_ANIM_DURATION = 500;
@@ -278,14 +278,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     protected void startTunnelService(Context context) {
         Log.i(TAG, "starting tunnel service");
-        if (isServiceRunning()) {
-            Log.d(TAG, "already running service");
-            TunnelManager tunnelManager = TunnelState.getTunnelState().getTunnelManager();
-            if (tunnelManager != null) {
-                tunnelManager.restartTunnel(mSocksServerAddress, mSocksServerPort, mDnsServerPort);
-            }
-            return;
-        }
+//        if (isServiceRunning()) {
+//            Log.d(TAG, "already running service");
+//            TunnelManager tunnelManager = TunnelState.getTunnelState().getTunnelManager();
+//            if (tunnelManager != null) {
+//                tunnelManager.restartTunnel(mSocksServerAddress, mSocksServerPort, mDnsServerPort);
+//            }
+//            return;
+//        }
         Intent startTunnelVpn = new Intent(context, TunnelVpnService.class);
         startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress);
         startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort);

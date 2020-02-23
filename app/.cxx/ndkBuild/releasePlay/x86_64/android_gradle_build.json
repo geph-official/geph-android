@@ -1,0 +1,242 @@
+{
+  "buildFiles": [
+    "/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk",
+    "/home/miyuruasuka/Geph2/geph-android/app/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/home/miyuruasuka/Android/Sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk NDK_APPLICATION_MK\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Application.mk APP_ABI\u003dx86_64 NDK_ALL_ABIS\u003dx86_64 NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj NDK_LIBS_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/lib clean"
+  ],
+  "buildTargetsCommand": "/home/miyuruasuka/Android/Sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk NDK_APPLICATION_MK\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Application.mk APP_ABI\u003dx86_64 NDK_ALL_ABIS\u003dx86_64 NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj NDK_LIBS_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/lib {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "tun2socks-releasePlay-x86_64": {
+      "buildCommand": "/home/miyuruasuka/Android/Sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk NDK_APPLICATION_MK\u003d/home/miyuruasuka/Geph2/geph-android/app/jni/Application.mk APP_ABI\u003dx86_64 NDK_ALL_ABIS\u003dx86_64 NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj NDK_LIBS_OUT\u003d/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/lib /home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj/local/x86_64/libtun2socks.so",
+      "toolchain": "toolchain-x86_64",
+      "abi": "x86_64",
+      "artifactName": "tun2socks",
+      "files": [
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/base/BLog.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/base/BLog_syslog.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/base/BPending.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/base/DebugObject.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/BufferWriter.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketBuffer.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketPassConnector.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketPassFairQueue.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketPassInterface.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketProtoDecoder.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketProtoEncoder.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketProtoFlow.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketRecvInterface.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/PacketStreamSender.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/SinglePacketBuffer.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/StreamPassInterface.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flow/StreamRecvInterface.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/flowextra/PacketPassInactivityMonitor.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/custom/sys.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/def.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/inet_chksum.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/init.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv4/icmp.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv4/ip4.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv4/ip4_addr.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv4/ip_frag.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv6/icmp6.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv6/ip6.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv6/ip6_addr.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv6/ip6_frag.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/ipv6/nd6.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/mem.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/memp.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/netif.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/pbuf.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/stats.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/tcp.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/tcp_in.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/tcp_out.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/timers.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/lwip/src/core/udp.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/socksclient/BSocksClient.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/stringmap/BStringMap.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BConnection_unix.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BNetwork.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BReactor_badvpn.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BSignal.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BTime.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/system/BUnixSignal.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/tun2socks/SocksUdpGwClient.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/tun2socks/tun2socks.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/tuntap/BTap.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        },
+        {
+          "src": "/home/miyuruasuka/Geph2/geph-android/app/../badvpn/udpgw_client/UdpGwClient.c",
+          "flags": "-target x86_64-none-linux-android21 -fdata-sections -ffunction-sections -fstack-protector-strong -funwind-tables -no-canonical-prefixes --sysroot /home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -Wno-invalid-command-line-argument -Wno-unused-command-line-argument -D_FORTIFY_SOURCE\u003d2 -fPIC -O2 -DNDEBUG -I../badvpn -I../badvpn/lwip/src/include/ipv4 -I../badvpn/lwip/src/include/ipv6 -I../badvpn/lwip/src/include -I../badvpn/lwip/custom -I../badvpn -DANDROID -std\u003dgnu99 -O3 -DNDEBUG -DBADVPN_THREAD_SAFE\u003d0 -DBADVPN_LINUX -DBADVPN_BREACTOR_BADVPN -D_GNU_SOURCE -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL -DBADVPN_LITTLE_ENDIAN -DPSIPHON -Wformat -Werror\u003dformat-security"
+        }
+      ],
+      "output": "/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj/local/x86_64/libtun2socks.so"
+    }
+  },
+  "toolchains": {
+    "toolchain-x86_64": {
+      "cCompilerExecutable": "/home/miyuruasuka/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": []
+}

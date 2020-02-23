@@ -59,19 +59,6 @@ public class TunnelManager implements Tunnel.HostService {
         m_tunnel = Tunnel.newTunnel(this);
     }
 
-    public boolean runSocksProxy() {
-        mSocksProxyDaemonProc = runSocksProxyDaemon();
-        return mSocksProxyDaemonProc != null;
-    }
-
-    public boolean stopSocksProxy() {
-        if (mSocksProxyDaemonProc != null) {
-            mSocksProxyDaemonProc.destroy();
-            mSocksProxyDaemonProc = null;
-        }
-        return true;
-    }
-
     // Implementation of android.app.Service.onStartCommand
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(LOG_TAG, "onStartCommand");
@@ -165,6 +152,9 @@ public class TunnelManager implements Tunnel.HostService {
                         break;
                     }
                 }
+                Log.e(tag, "stopping log stuff because the process died");
+                getVpnService().stopForeground(true);
+                System.exit(0);
             }
         });
         socksProxyDaemonErr.start();
@@ -188,6 +178,8 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(AccountUtils.getExit(getContext()));
             commands.add("-exitKey");
             commands.add(AccountUtils.getExitKey(getContext()));
+            commands.add("-fakeDNS=false");
+            commands.add("-dnsAddr=127.0.0.1:49983");
             if (AccountUtils.getTCP(getContext())) {
                 commands.add("-useTCP");
             }

@@ -33,6 +33,8 @@ function createWindow() {
   });
   win.setResizable(false);
   win.setMaximizable(false);
+  //let devtools = new BrowserWindow();
+  //win.webContents.setDevToolsWebContents(devtools.webContents);
   win.setMenu(null);
   // Prevent the UI itself from being routed through Geph
   win.webContents.session.setProxy(
@@ -55,6 +57,9 @@ function createWindow() {
         slashes: true
       })
     );
+    // win.setResizable(true);
+    // win.toggleDevTools();
+    //win.setMinimizable(false)
   }
 
   // Emitted when the window is closed.
@@ -85,6 +90,7 @@ let tray = null;
 app.on("ready", () => {
   createWindow();
   tray = new Tray(app.getAppPath() + "/icons/tray.png");
+  tray.setIgnoreDoubleClickEvents(true);
   tray.on("click", _ => {
     console.log("win.isVisible() = " + win.isVisible());
     if (win.isVisible()) {
@@ -110,5 +116,11 @@ app.on("activate", () => {
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow();
+  } else {
+    win.show();
   }
 });
+
+try {
+  app.dock.hide();
+} catch {}
