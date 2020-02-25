@@ -1,0 +1,60 @@
+{
+  "variant": {
+    "module": {
+      "rootBuildGradleFolder": "/home/miyuruasuka/Geph2/geph-android",
+      "sdkFolder": "/home/miyuruasuka/Android/Sdk",
+      "isNativeCompilerSettingsCacheEnabled": false,
+      "isBuildOnlyTargetAbiEnabled": true,
+      "splitsAbiFilterSet": [],
+      "intermediatesFolder": "/home/miyuruasuka/Geph2/geph-android/app/build/intermediates",
+      "gradleModulePathName": ":app",
+      "moduleRootFolder": "/home/miyuruasuka/Geph2/geph-android/app",
+      "makeFile": "/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk",
+      "buildSystem": "NDK_BUILD",
+      "compilerSettingsCacheFolder": "/home/miyuruasuka/Geph2/geph-android/.cxx",
+      "cxxFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx",
+      "ndkFolder": "/home/miyuruasuka/Android/Sdk/ndk/20.0.5594570",
+      "ndkVersion": "20.0.5594570",
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "cmakeToolchainFile": "."
+    },
+    "buildSystemArgumentList": [],
+    "cFlagList": [],
+    "cppFlagsList": [],
+    "variantName": "releasePlay",
+    "soFolder": "/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/lib",
+    "objFolder": "/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj/local",
+    "jsonFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay",
+    "gradleBuildOutputFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/cxx/releasePlay",
+    "isDebuggableEnabled": false,
+    "validAbiList": [
+      "ARMEABI_V7A",
+      "ARM64_V8A",
+      "X86",
+      "X86_64"
+    ],
+    "buildTargetSet": []
+  },
+  "abi": "X86_64",
+  "abiPlatformVersion": 21,
+  "cxxBuildFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64",
+  "jsonFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/android_gradle_build.json",
+  "gradleBuildOutputFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/cxx/releasePlay/x86_64",
+  "objFolder": "/home/miyuruasuka/Geph2/geph-android/app/build/intermediates/ndkBuild/releasePlay/obj/local/x86_64",
+  "buildCommandFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/build_command.txt",
+  "buildOutputFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/build_output.txt",
+  "modelOutputFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/build_model.json",
+  "jsonGenerationLoggingRecordFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/json_generation_record.json",
+  "compileCommandsJsonFile": "/home/miyuruasuka/Geph2/geph-android/app/.cxx/ndkBuild/releasePlay/x86_64/compile_commands.json"
+}

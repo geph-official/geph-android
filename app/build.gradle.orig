@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+
+android {
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+    compileSdkVersion 29
+    buildToolsVersion '29.0.2'
+    defaultConfig {
+        applicationId 'io.geph.android'
+        minSdkVersion 21
+        targetSdkVersion 29
+<<<<<<< HEAD
+        versionCode 328
+        versionName '3.2.8'
+=======
+        versionCode 343
+        versionName '3.4.3'
+>>>>>>> oldvpn
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+    buildTypes {
+        releaseAPK {
+            buildConfigField "String", "BUILD_VARIANT", "\"apk\""
+        }
+
+        releasePlay {
+            buildConfigField "String", "BUILD_VARIANT", "\"play\""
+        }
+
+        debug {
+            buildConfigField "String", "BUILD_VARIANT", "\"debug\""
+            debuggable true
+        }
+    }
+    externalNativeBuild {
+        ndkBuild {
+            path 'jni/Android.mk'
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+}
+
+task copyGephBinaries(type: Copy) {
+    description = 'Copying geph binaries from the prebuild directory'
+    from '../prebuild/'
+    into 'src/main/jniLibs'
+}
+
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        variant.javaCompiler.dependsOn(copyGephBinaries)
+    }
+}
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'

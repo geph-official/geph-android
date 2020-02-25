@@ -1,0 +1,10 @@
+<<<<<<< HEAD
+#Sun Feb 09 16:41:07 EST 2020
+=======
+#Sat Feb 22 17:15:14 EST 2020
+>>>>>>> oldvpn
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-5.4.1-all.zip
