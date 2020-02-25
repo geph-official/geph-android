@@ -13,8 +13,8 @@
       "buildSystem": "NDK_BUILD",
       "compilerSettingsCacheFolder": "/home/miyuruasuka/Geph2/geph-android/.cxx",
       "cxxFolder": "/home/miyuruasuka/Geph2/geph-android/app/.cxx",
-      "ndkFolder": "/home/miyuruasuka/Android/Sdk/ndk-bundle",
-      "ndkVersion": "21.0.6113669",
+      "ndkFolder": "/home/miyuruasuka/Android/Sdk/ndk/20.0.5594570",
+      "ndkVersion": "20.0.5594570",
       "ndkSupportedAbiList": [
         "ARMEABI_V7A",
         "ARM64_V8A",

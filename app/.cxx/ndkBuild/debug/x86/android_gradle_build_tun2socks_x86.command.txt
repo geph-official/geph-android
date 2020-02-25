@@ -1,4 +1,4 @@
-Executable : /home/miyuruasuka/Android/Sdk/ndk-bundle/ndk-build
+Executable : /home/miyuruasuka/Android/Sdk/ndk/20.0.5594570/ndk-build
 arguments : 
 NDK_PROJECT_PATH=null
 APP_BUILD_SCRIPT=/home/miyuruasuka/Geph2/geph-android/app/jni/Android.mk
