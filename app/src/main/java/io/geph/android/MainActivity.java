@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private static final String mSocksServerPort = "9909";
     private static final String mDnsServerPort = "49983";
 
+
+
     private static final String FRONT = "front";
     private static final long TOOLBAR_ACC_ANIM_DURATION = 500;
 
@@ -74,6 +76,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private View mProgress;
     private WebView mWebView;
     private Receiver vpnReceiver;
+
+    private String mUsername;
+    private String mPassword;
+    private String mExitName;
+    private String mExitKey;
+    private Boolean mUseTCP;
+    private Boolean mForceBridges;
+    private Boolean mBypassChina;
 
     private void bindActivity() {
         mWebView = findViewById(R.id.main_webview);
@@ -160,14 +170,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         jsShowToast("stopped proxbinder " + pid);
     }
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String exitKey, String useTCP, String forceBridges) {
-        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
-        prefs.edit().putString(Constants.SP_USERNAME, uname)
-                .putString(Constants.SP_PASSWORD, pwd)
-                .putString(Constants.SP_EXIT, exitName)
-                .putString(Constants.SP_EXITKEY, exitKey)
-                .putBoolean(Constants.SP_TCP, useTCP.equals("true"))
-                .putBoolean(Constants.SP_FORCEBRIDGES, forceBridges.equals("true")).apply();
+    public void jsStartDaemon(String uname, String pwd, String exitName, String exitKey, String useTCP, String forceBridges, String bypassChina) {
+//        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
+//        prefs.edit().putString(Constants.SP_USERNAME, uname)
+//                .putString(Constants.SP_PASSWORD, pwd)
+//                .putString(Constants.SP_EXIT, exitName)
+//                .putString(Constants.SP_EXITKEY, exitKey)
+//                .putBoolean(Constants.SP_TCP, useTCP.equals("true"))
+//                .putBoolean(Constants.SP_FORCEBRIDGES, forceBridges.equals("true")).apply();
+        mUsername = uname;
+        mPassword = pwd;
+        mExitName = exitName;
+        mExitKey = exitKey;
+        mUseTCP = useTCP.equals("true");
+        mForceBridges = forceBridges.equals("true");
+        mBypassChina = bypassChina.equals("true");
         startVpn();
     }
     @JavascriptInterface
@@ -290,6 +307,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress);
         startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort);
         startTunnelVpn.putExtra(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort);
+        startTunnelVpn.putExtra(TunnelManager.USERNAME, mUsername);
+        startTunnelVpn.putExtra(TunnelManager.PASSWORD, mPassword);
+        startTunnelVpn.putExtra(TunnelManager.EXIT_NAME, mExitName);
+        Log.d(TAG, mExitName);
+        startTunnelVpn.putExtra(TunnelManager.EXIT_KEY, mExitKey);
+        startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
+        startTunnelVpn.putExtra(TunnelManager.USE_TCP, mUseTCP);
+        startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINA, mBypassChina);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");
             return;

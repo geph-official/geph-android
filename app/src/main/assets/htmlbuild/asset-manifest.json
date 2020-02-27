@@ -1,11 +1,11 @@
 {
   "files": {
     "main.css": "./static/css/main.c68a350d.chunk.css",
-    "main.js": "./static/js/main.6f8d16b9.chunk.js",
+    "main.js": "./static/js/main.3a9379eb.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.feb70738.js",
-    "static/js/2.3233cf72.chunk.js": "./static/js/2.3233cf72.chunk.js",
+    "static/js/2.034ddc39.chunk.js": "./static/js/2.034ddc39.chunk.js",
     "index.html": "./index.html",
-    "precache-manifest.99381d771ef5e485cb315eb2fbd7137d.js": "./precache-manifest.99381d771ef5e485cb315eb2fbd7137d.js",
+    "precache-manifest.beb49cb7c4c77d13b8450d05d6d53d72.js": "./precache-manifest.beb49cb7c4c77d13b8450d05d6d53d72.js",
     "service-worker.js": "./service-worker.js",
     "static/media/typography.css": "./static/media/LibreFranklin-RegularItalic.1b746baa.ttf",
     "static/media/logo-naked.svg": "./static/media/logo-naked.cab1df1a.svg"
