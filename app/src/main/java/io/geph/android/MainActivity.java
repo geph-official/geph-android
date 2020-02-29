@@ -245,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         super.onDestroy();
         Log.d(TAG, "destroy");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(vpnReceiver);
+        System.exit(0);
     }
 
     protected void prepareAndStartTunnelService() {

@@ -209,13 +209,13 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add("-fakeDNS=true");
             commands.add("-dnsAddr=127.0.0.1:49983");
             if (mUseTCP) {
-                commands.add("-useTCP");
+                commands.add("-useTCP=true");
             }
             if (mForceBridges) {
-                commands.add("-forceBridges");
+                commands.add("-forceBridges=true");
             }
             if (mBypassChina) {
-                commands.add("-bypassChina");
+                commands.add("-bypassChinese=true");
             }
             Log.i(LOG_TAG, commands.toString());
             ProcessBuilder pb = new ProcessBuilder(commands);

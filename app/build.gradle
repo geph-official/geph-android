@@ -13,8 +13,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1343
-        versionName '3.4.3a'
+        versionCode 1345
+        versionName '3.4.5'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -23,10 +23,12 @@ android {
     buildTypes {
         releaseAPK {
             buildConfigField "String", "BUILD_VARIANT", "\"apk\""
+            minifyEnabled = true
         }
 
         releasePlay {
             buildConfigField "String", "BUILD_VARIANT", "\"play\""
+            minifyEnabled = true
         }
 
         debug {

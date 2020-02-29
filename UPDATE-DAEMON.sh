@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export PREFIX="https://binaries.geph.io"
-export VERSION="v0.18.11"
+export VERSION="v0.18.14"
 
 PREBUILD="./prebuild"
 # ABI names must match with arguments provided to android.defaultConfig.ndk.abiFilters
