@@ -154,8 +154,11 @@ public class Tunnel {
                                 .setSession(mHostService.getAppName())
                                 .setMtu(VPN_INTERFACE_MTU)
                                 .addAddress(mPrivateAddress.mIpAddress, mPrivateAddress.mPrefixLength)
+                                .addAddress("1001::", mPrivateAddress.mPrefixLength)
                                 .addRoute("0.0.0.0", 0)
+                                .addRoute("0000::", 0)
                                 .addDnsServer(mPrivateAddress.mRouter)
+                                .addDnsServer("1002::")
                                 .addDisallowedApplication(mHostService.getContext().getPackageName())
                                 .establish();
             } catch (PackageManager.NameNotFoundException e) {

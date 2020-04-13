@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     /**
      * Testing values
      */
-    private static final String mSocksServerAddress = "localhost";
+    private static final String mSocksServerAddress = "127.0.0.1";
     private static final String mSocksServerPort = "9909";
     private static final String mDnsServerPort = "49983";
 

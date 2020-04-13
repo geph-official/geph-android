@@ -208,6 +208,8 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add(mExitKey);
             commands.add("-fakeDNS=true");
             commands.add("-dnsAddr=127.0.0.1:49983");
+            commands.add("-statsAddr=127.0.0.1:9809");
+            commands.add("-socksAddr=127.0.0.1:9909");
             if (mUseTCP) {
                 commands.add("-useTCP=true");
             }
