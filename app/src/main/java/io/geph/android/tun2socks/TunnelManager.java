@@ -8,16 +8,13 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.VpnService;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +22,6 @@ import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.geph.android.AccountUtils;
 import io.geph.android.MainActivity;
 import io.geph.android.R;
 
@@ -40,7 +36,7 @@ public class TunnelManager implements Tunnel.HostService {
     public static final String PASSWORD = "password";
     public static final String EXIT_NAME = "exitName";
     public static final String EXIT_KEY = "exitKey";
-    public static final String USE_TCP = "useTCP";
+    public static final String LISTEN_ALL = "listenAll";
     public static final String FORCE_BRIDGES = "forceBridges";
     public static final String BYPASS_CHINA = "bypassChina";
 
@@ -61,7 +57,7 @@ public class TunnelManager implements Tunnel.HostService {
     private String mPassword;
     private String mExitName;
     private String mExitKey;
-    private Boolean mUseTCP;
+    private Boolean mListenAll;
     private Boolean mForceBridges;
     private Boolean mBypassChina;
     private Process mSocksProxyDaemonProc;
@@ -93,7 +89,7 @@ public class TunnelManager implements Tunnel.HostService {
         mExitKey = intent.getStringExtra(EXIT_KEY);
         mExitName = intent.getStringExtra(EXIT_NAME);
         mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false);
-        mUseTCP = intent.getBooleanExtra(USE_TCP, false);
+        mListenAll = intent.getBooleanExtra(LISTEN_ALL, false);
         mBypassChina = intent.getBooleanExtra(BYPASS_CHINA, false);
         Log.i(LOG_TAG, "onStartCommand parsed intent");
 
@@ -209,9 +205,12 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add("-fakeDNS=true");
             commands.add("-dnsAddr=127.0.0.1:49983");
             commands.add("-statsAddr=127.0.0.1:9809");
-            commands.add("-socksAddr=127.0.0.1:9909");
-            if (mUseTCP) {
-                commands.add("-useTCP=true");
+            if (mListenAll) {
+                commands.add("-socksAddr=0.0.0.0:9909");
+                commands.add("-httpAddr=0.0.0.0:9910");
+            } else {
+                commands.add("-socksAddr=127.0.0.1:9909");
+                commands.add("-httpAddr=127.0.0.1:9910");
             }
             if (mForceBridges) {
                 commands.add("-forceBridges=true");

@@ -9,28 +9,24 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private void bindActivity() {
         mWebView = findViewById(R.id.main_webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setAppCacheEnabled(false);
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
         mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
@@ -109,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
             }
         });
         mWebView.addJavascriptInterface(this, "Android");
-
+        mWebView.clearCache(true);
         mWebView.loadUrl("file:///android_asset/htmlbuild/index.html");
         //mWebView.loadUrl("http://10.0.2.2:8100/");
     }
@@ -314,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         Log.d(TAG, mExitName);
         startTunnelVpn.putExtra(TunnelManager.EXIT_KEY, mExitKey);
         startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
-        startTunnelVpn.putExtra(TunnelManager.USE_TCP, mUseTCP);
+        startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mUseTCP);
         startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINA, mBypassChina);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");

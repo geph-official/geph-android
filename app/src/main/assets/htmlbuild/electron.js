@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Tray } = require("electron");
+app.commandLine.appendSwitch("disable-http-cache");
 const path = require("path");
 const url = require("url");
 const isDev = require("electron-is-dev");
@@ -19,15 +20,15 @@ function createWindow() {
     height: 670,
     webPreferences: {
       nodeIntegration: true,
-      webSecurity: false
+      webSecurity: false,
     },
-    show: false
+    show: false,
   });
   win.once("ready-to-show", () => {
     win.show();
   });
   win.setMenuBarVisibility(false);
-  win.webContents.on("new-window", function(event, url) {
+  win.webContents.on("new-window", function (event, url) {
     event.preventDefault();
     shell.openExternal(url);
   });
@@ -39,7 +40,7 @@ function createWindow() {
   // Prevent the UI itself from being routed through Geph
   win.webContents.session.setProxy(
     {
-      proxyRules: "direct://"
+      proxyRules: "direct://",
     },
     () => console.log("UI proxy unset")
   );
@@ -54,7 +55,7 @@ function createWindow() {
       url.format({
         pathname: path.join(__dirname, "../build/index.html"),
         protocol: "file:",
-        slashes: true
+        slashes: true,
       })
     );
     // win.setResizable(true);
@@ -91,7 +92,7 @@ app.on("ready", () => {
   createWindow();
   tray = new Tray(app.getAppPath() + "/icons/tray.png");
   tray.setIgnoreDoubleClickEvents(true);
-  tray.on("click", _ => {
+  tray.on("click", (_) => {
     console.log("win.isVisible() = " + win.isVisible());
     if (win.isVisible()) {
       win.hide();
