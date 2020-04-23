@@ -37,9 +37,9 @@ public class TunnelVpnService extends VpnService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, "on start");
         m_tunnelManager.onStartCommand(intent, flags, startId);
-        if (Build.VERSION.SDK_INT >= 22) {
-            this.setUnderlyingNetworks(null);
-        }
+//        if (Build.VERSION.SDK_INT >= 22) {
+//            this.setUnderlyingNetworks(null);
+//        }
         return START_NOT_STICKY;
     }
 
