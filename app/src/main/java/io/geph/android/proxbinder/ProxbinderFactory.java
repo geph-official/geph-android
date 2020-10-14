@@ -20,7 +20,7 @@ public class ProxbinderFactory {
     public static Proxbinder getProxbinder(Context context) {
         final String daemonBinaryPath =
                 context.getApplicationInfo().nativeLibraryDir + "/libgeph.so";
-        ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "-binderProxy", "127.0.0.1:23456");
+        ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "binder-proxy", "--listen", "127.0.0.1:23456");
         final Process proc;
         try {
             proc = pb.start();

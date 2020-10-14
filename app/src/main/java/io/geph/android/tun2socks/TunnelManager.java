@@ -35,10 +35,8 @@ public class TunnelManager implements Tunnel.HostService {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String EXIT_NAME = "exitName";
-    public static final String EXIT_KEY = "exitKey";
     public static final String LISTEN_ALL = "listenAll";
     public static final String FORCE_BRIDGES = "forceBridges";
-    public static final String BYPASS_CHINA = "bypassChina";
 
     private static final String LOG_TAG = "TunnelManager";
     private static final String CACHE_DIR_NAME = "geph";
@@ -56,10 +54,8 @@ public class TunnelManager implements Tunnel.HostService {
     private String mUsername;
     private String mPassword;
     private String mExitName;
-    private String mExitKey;
     private Boolean mListenAll;
     private Boolean mForceBridges;
-    private Boolean mBypassChina;
     private Process mSocksProxyDaemonProc;
     private AtomicBoolean m_isReconnecting;
 
@@ -86,11 +82,9 @@ public class TunnelManager implements Tunnel.HostService {
         Log.i(LOG_TAG, "onStartCommand parsed some stuff");
         mUsername = intent.getStringExtra(USERNAME);
         mPassword = intent.getStringExtra(PASSWORD);
-        mExitKey = intent.getStringExtra(EXIT_KEY);
         mExitName = intent.getStringExtra(EXIT_NAME);
         mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false);
         mListenAll = intent.getBooleanExtra(LISTEN_ALL, false);
-        mBypassChina = intent.getBooleanExtra(BYPASS_CHINA, false);
         Log.i(LOG_TAG, "onStartCommand parsed intent");
 
         if (setupAndRunSocksProxyDaemon() == null) {
@@ -190,33 +184,32 @@ public class TunnelManager implements Tunnel.HostService {
         final Context ctx = getContext();
         final String daemonBinaryPath =
                 ctx.getApplicationInfo().nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR;
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
 
         try {
             List<String> commands = new ArrayList<>();
             commands.add(daemonBinaryPath);
-            commands.add("-username");
+            commands.add("connect");
+            commands.add("--username");
             commands.add(mUsername);
-            commands.add("-password");
+            commands.add("--password");
             commands.add(mPassword);
-            commands.add("-exitName");
+            commands.add("--exit-server");
             commands.add(mExitName);
-            commands.add("-exitKey");
-            commands.add(mExitKey);
-            commands.add("-fakeDNS=true");
-            commands.add("-dnsAddr=127.0.0.1:49983");
-            commands.add("-statsAddr=127.0.0.1:9809");
+            commands.add("--credential-cache");
+            commands.add(dbPath);
+            commands.add("--dns-listen");
+            commands.add("127.0.0.1:49983");
+//            commands.add("-fakeDNS=true");
+//            commands.add("-dnsAddr=127.0.0.1:49983");
             if (mListenAll) {
-                commands.add("-socksAddr=0.0.0.0:9909");
-                commands.add("-httpAddr=0.0.0.0:9910");
-            } else {
-                commands.add("-socksAddr=127.0.0.1:9909");
-                commands.add("-httpAddr=127.0.0.1:9910");
+                commands.add("--socks5-listen");
+                commands.add("0.0.0.0:9909");
+                commands.add("--http-listen");
+                commands.add("0.0.0.0:9910");
             }
             if (mForceBridges) {
-                commands.add("-forceBridges=true");
-            }
-            if (mBypassChina) {
-                commands.add("-bypassChinese=true");
+                commands.add("--use-bridges");
             }
             Log.i(LOG_TAG, commands.toString());
             ProcessBuilder pb = new ProcessBuilder(commands);

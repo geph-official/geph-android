@@ -1,5 +1,6 @@
 package io.geph.android;
 
+
 import android.annotation.TargetApi;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -27,6 +29,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,10 +80,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private String mUsername;
     private String mPassword;
     private String mExitName;
-    private String mExitKey;
-    private Boolean mUseTCP;
+    private Boolean mListenAll;
     private Boolean mForceBridges;
-    private Boolean mBypassChina;
 
     private void bindActivity() {
         mWebView = findViewById(R.id.main_webview);
@@ -115,28 +117,36 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @JavascriptInterface
     public final void jsCheckAccount(final String uname, final String pwd, final String cbackString) {
         final Context ctx = this.getApplicationContext();
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
         new Thread(new Runnable() {
             public void run() {
                 final String daemonBinaryPath =
                         ctx.getApplicationInfo().nativeLibraryDir + "/libgeph.so";
-                ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "-loginCheck",
-                        "-username", uname,
-                        "-password", pwd);
+                ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "sync",
+                        "--username", uname,
+                        "--password", pwd,
+                "--credential-cache", dbPath);
                 Log.e(TAG, "START CHECK");
                 final Process proc;
-                Integer retcode;
+                String retcode;
                 try {
                     proc = pb.start();
-                    retcode = proc.waitFor();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+                    StringBuilder builder = new StringBuilder();
+                    String line = null;
+                    while ( (line = reader.readLine()) != null) {
+                        builder.append(line);
+                        builder.append(System.getProperty("line.separator"));
+                    }
+                    Log.e(TAG, "DONE");
+                    retcode = builder.toString();
                 } catch (Exception e) {
-                    Log.e(TAG, e.getMessage());
-                    retcode = -1;
+                    retcode = "{'error': 'internal'}";
                 }
-                Log.e(TAG, cbackString + retcode);
-                final Integer lala = retcode;
+                final String tocall = retcode;
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        mWebView.loadUrl("javascript:" + cbackString + "(" + lala + ");void(0);");
+                        mWebView.loadUrl("javascript:" + cbackString + "('" + Base64.encodeToString(tocall.getBytes(), Base64.DEFAULT) + "');void(0);");
                     }
                 });
             }
@@ -168,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         jsShowToast("stopped proxbinder " + pid);
     }
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String exitKey, String useTCP, String forceBridges, String bypassChina) {
+    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges) {
 //        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
 //        prefs.edit().putString(Constants.SP_USERNAME, uname)
 //                .putString(Constants.SP_PASSWORD, pwd)
@@ -179,10 +189,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mUsername = uname;
         mPassword = pwd;
         mExitName = exitName;
-        mExitKey = exitKey;
-        mUseTCP = useTCP.equals("true");
+        mListenAll = listenAll.equals("true");
         mForceBridges = forceBridges.equals("true");
-        mBypassChina = bypassChina.equals("true");
         startVpn();
     }
     @JavascriptInterface
@@ -310,10 +318,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         startTunnelVpn.putExtra(TunnelManager.PASSWORD, mPassword);
         startTunnelVpn.putExtra(TunnelManager.EXIT_NAME, mExitName);
         Log.d(TAG, mExitName);
-        startTunnelVpn.putExtra(TunnelManager.EXIT_KEY, mExitKey);
         startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
-        startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mUseTCP);
-        startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINA, mBypassChina);
+        startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mListenAll);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");
             return;
