@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "./static/css/main.c68a350d.chunk.css",
-    "main.js": "./static/js/main.4cb2b749.chunk.js",
+    "main.js": "./static/js/main.4c6536b9.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.110be190.js",
-    "static/js/2.acea9c31.chunk.js": "./static/js/2.acea9c31.chunk.js",
+    "static/js/2.1e3341a9.chunk.js": "./static/js/2.1e3341a9.chunk.js",
     "index.html": "./index.html",
-    "precache-manifest.91db26c76fb844a4bcde38da3f7cd4f3.js": "./precache-manifest.91db26c76fb844a4bcde38da3f7cd4f3.js",
+    "precache-manifest.3897a7333097ec2f9b8e3f6a892e7ac8.js": "./precache-manifest.3897a7333097ec2f9b8e3f6a892e7ac8.js",
     "service-worker.js": "./service-worker.js",
-    "static/js/2.acea9c31.chunk.js.LICENSE.txt": "./static/js/2.acea9c31.chunk.js.LICENSE.txt",
+    "static/js/2.1e3341a9.chunk.js.LICENSE.txt": "./static/js/2.1e3341a9.chunk.js.LICENSE.txt",
     "static/media/typography.css": "./static/media/LibreFranklin-RegularItalic.1b746baa.ttf",
     "static/media/logo-naked.svg": "./static/media/logo-naked.cab1df1a.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.110be190.js",
-    "static/js/2.acea9c31.chunk.js",
+    "static/js/2.1e3341a9.chunk.js",
     "static/css/main.c68a350d.chunk.css",
-    "static/js/main.4cb2b749.chunk.js"
+    "static/js/main.4c6536b9.chunk.js"
   ]
 }
