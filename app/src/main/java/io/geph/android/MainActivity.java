@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                     retcode = "{'error': 'internal'}";
                 }
                 final String tocall = retcode;
+                Log.e(TAG, cbackString);
                 runOnUiThread(new Runnable() {
                     public void run() {
                         mWebView.loadUrl("javascript:" + cbackString + "('" + Base64.encodeToString(tocall.getBytes(), Base64.DEFAULT) + "');void(0);");
