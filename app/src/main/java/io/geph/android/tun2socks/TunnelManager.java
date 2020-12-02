@@ -8,14 +8,23 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.VpnService;
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -25,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.geph.android.MainActivity;
 import io.geph.android.R;
 
-public class TunnelManager implements Tunnel.HostService {
+public class TunnelManager  {
 
     public static final int NOTIFICATION_ID = 7839214;
 
@@ -37,6 +46,7 @@ public class TunnelManager implements Tunnel.HostService {
     public static final String EXIT_NAME = "exitName";
     public static final String LISTEN_ALL = "listenAll";
     public static final String FORCE_BRIDGES = "forceBridges";
+    public static final String BYPASS_CHINESE = "bypassChinese";
 
     private static final String LOG_TAG = "TunnelManager";
     private static final String CACHE_DIR_NAME = "geph";
@@ -45,7 +55,6 @@ public class TunnelManager implements Tunnel.HostService {
     private CountDownLatch m_tunnelThreadStopSignal;
     private Thread m_tunnelThread;
     private AtomicBoolean m_isStopping;
-    private Tunnel m_tunnel = null;
     private String mSocksServerAddressBase;
     private String mSocksServerAddress;
     private String mSocksServerPort;
@@ -56,14 +65,14 @@ public class TunnelManager implements Tunnel.HostService {
     private String mExitName;
     private Boolean mListenAll;
     private Boolean mForceBridges;
-    private Process mSocksProxyDaemonProc;
+    private Boolean mBypassChinese;
+    private Process mDaemonProc;
     private AtomicBoolean m_isReconnecting;
 
     public TunnelManager(TunnelVpnService parentService) {
         m_parentService = parentService;
         m_isStopping = new AtomicBoolean(false);
         m_isReconnecting = new AtomicBoolean(false);
-        m_tunnel = Tunnel.newTunnel(this);
     }
 
     // Implementation of android.app.Service.onStartCommand
@@ -85,9 +94,10 @@ public class TunnelManager implements Tunnel.HostService {
         mExitName = intent.getStringExtra(EXIT_NAME);
         mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false);
         mListenAll = intent.getBooleanExtra(LISTEN_ALL, false);
+        mBypassChinese = intent.getBooleanExtra(BYPASS_CHINESE, false);
         Log.i(LOG_TAG, "onStartCommand parsed intent");
 
-        if (setupAndRunSocksProxyDaemon() == null) {
+        if (setupAndRunDaemon() == null) {
             Log.e(LOG_TAG, "Failed to start the socks proxy daemon.");
             m_parentService.broadcastVpnStart(false /* success */);
             return 0;
@@ -97,18 +107,6 @@ public class TunnelManager implements Tunnel.HostService {
             Log.e(LOG_TAG, "Failed to receive the socks server address.");
             m_parentService.broadcastVpnStart(false /* success */);
             return 0;
-        }
-
-        try {
-            if (!m_tunnel.startRouting()) {
-                Log.e(LOG_TAG, "Failed to establish VPN");
-                m_parentService.broadcastVpnStart(false /* success */);
-            } else {
-                startTunnel();
-            }
-        } catch (Tunnel.Exception e) {
-            Log.e(LOG_TAG, String.format("Failed to establish VPN: %s", e.getMessage()));
-            m_parentService.broadcastVpnStart(false /* success */);
         }
 
         final Context ctx = getContext();
@@ -142,45 +140,137 @@ public class TunnelManager implements Tunnel.HostService {
                     channelName, NotificationManager.IMPORTANCE_NONE);
             chan.setDescription("Geph background service");
             NotificationManager notificationManager = getContext().getSystemService(NotificationManager.class);
+            assert notificationManager != null;
             notificationManager.createNotificationChannel(chan);
             return channelId;
         }
         return "";
     }
 
-    private Process setupAndRunSocksProxyDaemon() {
+    private Process setupAndRunDaemon() {
         // Run Geph-Go with uProxy style fail-safe
-        mSocksProxyDaemonProc = runSocksProxyDaemon();
-        if (mSocksProxyDaemonProc == null) {
-            return mSocksProxyDaemonProc;
+        mDaemonProc = runDaemon();
+        if (mDaemonProc == null) {
+            return mDaemonProc;
         }
 
-        Thread socksProxyDaemonErr = new Thread(new Runnable() {
+        Thread daemonLogs = new Thread(new Runnable() {
             @Override
             public void run() {
                 String tag = "Geph";
-                InputStream err = mSocksProxyDaemonProc.getErrorStream();
+                InputStream err = mDaemonProc.getErrorStream();
                 Scanner scanner = new Scanner(err);
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
-                    Log.e(tag, line);
-                    if (line.contains("FATAL")) {
-                        Log.e(tag, "Stopping the service due to invalid credential");
-                        m_parentService.broadcastVpnDisconnect(TunnelVpnService.TUNNEL_VPN_STOP_INVALID_CREDENTIAL);
-                        break;
-                    }
+                    Log.d(tag, line);
                 }
-                Log.e(tag, "stopping log stuff because the process died");
+                Log.d(tag, "stopping log stuff because the process died");
                 getVpnService().stopForeground(true);
                 System.exit(0);
             }
         });
-        socksProxyDaemonErr.start();
+        daemonLogs.start();
 
-        return mSocksProxyDaemonProc;
+        Thread daemonStdout = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String tag = "GephStdio";
+                ParcelFileDescriptor tunFd = null;
+                FileInputStream input = null;
+                FileOutputStream output = null;
+                try {
+                    try (InputStream raw_stream = mDaemonProc.getInputStream()) {
+                        BufferedInputStream stream = new BufferedInputStream(raw_stream);
+                        Thread daemonStdin = null;
+                        while (true) {
+                            int kind = stream.read();
+                            int bodylen1 = stream.read();
+                            int bodylen2 = stream.read();
+                            int bodylen = bodylen1 + bodylen2*256;
+                            byte[] body = new byte[bodylen];
+                            int n = 0;
+                            while (n < body.length) {
+                                n += stream.read(body, n, body.length - n);
+                            }
+                            if (kind == 1) {
+                                String bodyString = new String(body, StandardCharsets.UTF_8);
+                                Log.d(tag, "init IP address of " + bodyString);
+                                String[] splitted = bodyString.split("/");
+                                InetAddress addr = InetAddress.getByName(splitted[0]);
+                                if (tunFd != null) {
+                                    input.close();
+                                    output.close();
+                                    tunFd.close();
+                                    daemonStdin.interrupt();
+                                    daemonStdin.wait();
+                                }
+                                tunFd = m_parentService.newBuilder().addAddress(addr, 10).
+                                        addRoute("0.0.0.0", 0).
+                                        addDnsServer("9.9.9.9").
+                                        addDisallowedApplication(getContext().getPackageName())
+                                        .setBlocking(true)
+                                        .setMtu(1280)
+                                        .establish();
+                                assert tunFd != null;
+                                input = new FileInputStream(tunFd.getFileDescriptor());
+                                output = new FileOutputStream(tunFd.getFileDescriptor());
+                                final FileInputStream finalInput = input;
+                                daemonStdin = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        byte[] body = new byte[2048];
+                                        try {
+                                            try (OutputStream stream = mDaemonProc.getOutputStream()) {
+                                                while (true) {
+                                                    try {
+                                                        int n = finalInput.read(body);
+                                                        stream.write(0);
+                                                        stream.write(n % 256);
+                                                        stream.write(n / 256);
+                                                        stream.write(body, 0, n);
+                                                        stream.flush();
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                daemonStdin.start();
+                            } else {
+                                if (output != null) {
+                                    try {
+                                        output.write(body);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException | PackageManager.NameNotFoundException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    if (tunFd != null) {
+                        try {
+                            tunFd.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+        daemonStdout.start();
+
+        return mDaemonProc;
     }
 
-    private Process runSocksProxyDaemon() {
+    private Process runDaemon() {
         final Context ctx = getContext();
         final String daemonBinaryPath =
                 ctx.getApplicationInfo().nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR;
@@ -199,17 +289,19 @@ public class TunnelManager implements Tunnel.HostService {
             commands.add("--credential-cache");
             commands.add(dbPath);
             commands.add("--dns-listen");
-            commands.add("127.0.0.1:49983");
+            commands.add("127.0.0.1:15353");
+            commands.add("--stdio-vpn");
 //            commands.add("-fakeDNS=true");
 //            commands.add("-dnsAddr=127.0.0.1:49983");
             if (mListenAll) {
                 commands.add("--socks5-listen");
                 commands.add("0.0.0.0:9909");
-                commands.add("--http-listen");
-                commands.add("0.0.0.0:9910");
             }
             if (mForceBridges) {
                 commands.add("--use-bridges");
+            }
+            if (mBypassChinese) {
+                commands.add("--exclude-prc");
             }
             Log.i(LOG_TAG, commands.toString());
             ProcessBuilder pb = new ProcessBuilder(commands);
@@ -222,15 +314,15 @@ public class TunnelManager implements Tunnel.HostService {
     }
 
     public void terminateSocksProxyDaemon() {
-        if (mSocksProxyDaemonProc != null) {
-            mSocksProxyDaemonProc.destroy();
-            mSocksProxyDaemonProc = null;
+        if (mDaemonProc != null) {
+            mDaemonProc.destroy();
+            mDaemonProc = null;
         }
     }
 
     public void restartSocksProxyDaemon() {
         terminateSocksProxyDaemon();
-        setupAndRunSocksProxyDaemon();
+        setupAndRunDaemon();
     }
 
     // Implementation of android.app.Service.onDestroy
@@ -290,26 +382,11 @@ public class TunnelManager implements Tunnel.HostService {
         signalStopService();
     }
 
-    private void startTunnel() {
-        m_tunnelThreadStopSignal = new CountDownLatch(1);
-        m_tunnelThread =
-                new Thread(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                runTunnel(mSocksServerAddress, mDnsResolverAddress);
-                            }
-                        });
-        m_tunnelThread.start();
-    }
 
     private void runTunnel(String socksServerAddress, String dnsResolverAddress) {
         m_isStopping.set(false);
 
         try {
-            if (!m_tunnel.startTunneling(socksServerAddress, dnsResolverAddress)) {
-                throw new Tunnel.Exception("application is not prepared or revoked");
-            }
             Log.i(LOG_TAG, "VPN service running");
             m_parentService.broadcastVpnStart(true /* success */);
 
@@ -321,22 +398,9 @@ public class TunnelManager implements Tunnel.HostService {
 
             m_isStopping.set(true);
 
-        } catch (Tunnel.Exception e) {
-            Log.e(LOG_TAG, String.format("Start tunnel failed: %s", e.getMessage()));
-            m_parentService.broadcastVpnStart(false /* success */);
         } finally {
-            if (m_isReconnecting.get()) {
-                // Stop tunneling only, not VPN, if reconnecting.
-                Log.i(LOG_TAG, "Stopping tunnel.");
-                m_tunnel.stopTunneling();
-            } else {
-                // Stop VPN tunnel and service only if not reconnecting.
-                Log.i(LOG_TAG, "Stopping VPN and tunnel.");
-                m_tunnel.stop();
                 m_parentService.stopForeground(true);
                 m_parentService.stopSelf();
-            }
-            m_isReconnecting.set(false);
         }
     }
 
@@ -344,37 +408,27 @@ public class TunnelManager implements Tunnel.HostService {
     // Tunnel.HostService
     //----------------------------------------------------------------------------
 
-    @Override
-    public String getAppName() {
-        return "Tun2Socks";
-    }
 
-    @Override
     public Context getContext() {
         return m_parentService;
     }
 
-    @Override
     public VpnService getVpnService() {
         return ((TunnelVpnService) m_parentService);
     }
 
-    @Override
     public VpnService.Builder newVpnServiceBuilder() {
         return ((TunnelVpnService) m_parentService).newBuilder();
     }
 
-    @Override
     public void onDiagnosticMessage(String message) {
         Log.d(LOG_TAG, message);
     }
 
-    @Override
     public void onTunnelConnected() {
         Log.i(LOG_TAG, "Tunnel connected.");
     }
 
-    @Override
     @TargetApi(Build.VERSION_CODES.M)
     public void onVpnEstablished() {
         Log.i(LOG_TAG, "VPN established.");

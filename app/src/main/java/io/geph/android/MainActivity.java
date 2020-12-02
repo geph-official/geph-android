@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private String mUsername;
     private String mPassword;
     private String mExitName;
+    private Boolean mBypassChinese;
     private Boolean mListenAll;
     private Boolean mForceBridges;
 
@@ -179,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         jsShowToast("stopped proxbinder " + pid);
     }
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges) {
+    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges, String bypassChinese) {
 //        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
 //        prefs.edit().putString(Constants.SP_USERNAME, uname)
 //                .putString(Constants.SP_PASSWORD, pwd)
@@ -192,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mExitName = exitName;
         mListenAll = listenAll.equals("true");
         mForceBridges = forceBridges.equals("true");
+        mBypassChinese = bypassChinese.equals("true");
         startVpn();
     }
     @JavascriptInterface
@@ -321,6 +323,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         Log.d(TAG, mExitName);
         startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
         startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mListenAll);
+        startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINESE, mBypassChinese);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");
             return;

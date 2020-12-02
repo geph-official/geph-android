@@ -2,8 +2,6 @@ package io.geph.android.api;
 
 import android.util.Log;
 
-import io.geph.android.tun2socks.Tunnel;
-
 /**
  * @author j3sawyer
  */
