@@ -15,6 +15,7 @@ import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.NotificationCompat;
+import android.system.Os;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -26,6 +27,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
@@ -179,39 +181,38 @@ public class TunnelManager  {
                 FileInputStream input = null;
                 FileOutputStream output = null;
                 try {
-                    try (InputStream raw_stream = mDaemonProc.getInputStream()) {
-                        BufferedInputStream stream = new BufferedInputStream(raw_stream);
+                    try (InputStream stdout = mDaemonProc.getInputStream(); OutputStream stdin = mDaemonProc.getOutputStream()) {
                         Thread daemonStdin = null;
+                        byte[] body = new byte[2048];
                         while (true) {
-                            int kind = stream.read();
-                            int bodylen1 = stream.read();
-                            int bodylen2 = stream.read();
+                            int kind = stdout.read();
+                            int bodylen1 = stdout.read();
+                            int bodylen2 = stdout.read();
                             int bodylen = bodylen1 + bodylen2*256;
-                            byte[] body = new byte[bodylen];
                             int n = 0;
-                            while (n < body.length) {
-                                n += stream.read(body, n, body.length - n);
+                            while (n < bodylen) {
+                                n += stdout.read(body, n, bodylen - n);
                             }
                             if (kind == 1) {
-                                String bodyString = new String(body, StandardCharsets.UTF_8);
+                                String bodyString = new String(Arrays.copyOfRange(body, 0, bodylen), StandardCharsets.UTF_8);
                                 Log.d(tag, "init IP address of " + bodyString);
                                 String[] splitted = bodyString.split("/");
                                 InetAddress addr = InetAddress.getByName(splitted[0]);
                                 if (tunFd != null) {
-                                    input.close();
-                                    output.close();
                                     tunFd.close();
                                     daemonStdin.interrupt();
-                                    daemonStdin.wait();
+                                    daemonStdin.join();
+                                    tunFd = null;
                                 }
-                                tunFd = m_parentService.newBuilder().addAddress(addr, 10).
-                                        addRoute("0.0.0.0", 0).
-                                        addDnsServer("9.9.9.9").
-                                        addDisallowedApplication(getContext().getPackageName())
-                                        .setBlocking(true)
-                                        .setMtu(1280)
-                                        .establish();
-                                assert tunFd != null;
+                                while (tunFd == null) {
+                                    tunFd = m_parentService.newBuilder().addAddress(addr, 10).
+                                            addRoute("0.0.0.0", 0).
+                                            addDnsServer("9.9.9.9").
+                                            addDisallowedApplication(getContext().getPackageName())
+                                            .setBlocking(true)
+                                            .setMtu(1280)
+                                            .establish();
+                                }
                                 input = new FileInputStream(tunFd.getFileDescriptor());
                                 output = new FileOutputStream(tunFd.getFileDescriptor());
                                 final FileInputStream finalInput = input;
@@ -220,22 +221,18 @@ public class TunnelManager  {
                                     public void run() {
                                         byte[] body = new byte[2048];
                                         try {
-                                            try (OutputStream stream = mDaemonProc.getOutputStream()) {
-                                                while (true) {
-                                                    try {
-                                                        int n = finalInput.read(body);
-                                                        stream.write(0);
-                                                        stream.write(n % 256);
-                                                        stream.write(n / 256);
-                                                        stream.write(body, 0, n);
-                                                        stream.flush();
-                                                    } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                    }
-                                                }
+                                            while (true) {
+                                                int n = finalInput.read(body, 3, 2045);
+                                                body[0] = 0;
+                                                body[1] = (byte) (n % 256);
+                                                body[2] = (byte) (n / 256);
+                                                stdin.write(body, 0, n+3);
+                                                stdin.flush();
+//                                                    Log.d(tag, "write to stdin " + n);
                                             }
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                            Log.i(tag, "daemonStdin exited " + e.toString());
                                         }
                                     }
                                 });
@@ -243,7 +240,8 @@ public class TunnelManager  {
                             } else {
                                 if (output != null) {
                                     try {
-                                        output.write(body);
+//                                        Log.d(tag, "read from stdout " + bodylen);
+                                        output.write(body, 0, bodylen);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -277,6 +275,7 @@ public class TunnelManager  {
         final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
 
         try {
+//            Os.setenv("RUST_LOG", "debug,sosistab", true);
             List<String> commands = new ArrayList<>();
             commands.add(daemonBinaryPath);
             commands.add("connect");
