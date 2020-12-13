@@ -207,7 +207,7 @@ public class TunnelManager  {
                                 while (tunFd == null) {
                                     tunFd = m_parentService.newBuilder().addAddress(addr, 10).
                                             addRoute("0.0.0.0", 0).
-                                            addDnsServer("9.9.9.9").
+                                            addDnsServer("74.82.42.42").
                                             addDisallowedApplication(getContext().getPackageName())
                                             .setBlocking(true)
                                             .setMtu(1280)
@@ -381,27 +381,6 @@ public class TunnelManager  {
         signalStopService();
     }
 
-
-    private void runTunnel(String socksServerAddress, String dnsResolverAddress) {
-        m_isStopping.set(false);
-
-        try {
-            Log.i(LOG_TAG, "VPN service running");
-            m_parentService.broadcastVpnStart(true /* success */);
-
-            try {
-                m_tunnelThreadStopSignal.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-            m_isStopping.set(true);
-
-        } finally {
-                m_parentService.stopForeground(true);
-                m_parentService.stopSelf();
-        }
-    }
 
     //----------------------------------------------------------------------------
     // Tunnel.HostService
