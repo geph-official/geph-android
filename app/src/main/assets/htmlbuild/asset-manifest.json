@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "./static/css/main.d9bb5a70.chunk.css",
-    "main.js": "./static/js/main.d5df04da.chunk.js",
+    "main.js": "./static/js/main.ce388a8a.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.110be190.js",
-    "static/js/2.d9b8f823.chunk.js": "./static/js/2.d9b8f823.chunk.js",
+    "static/js/2.19158e75.chunk.js": "./static/js/2.19158e75.chunk.js",
     "index.html": "./index.html",
-    "precache-manifest.9153d69ca87d5ab5ee0d1d7ac0818834.js": "./precache-manifest.9153d69ca87d5ab5ee0d1d7ac0818834.js",
+    "precache-manifest.ba2ab544e824048e4846fcd1d023e60b.js": "./precache-manifest.ba2ab544e824048e4846fcd1d023e60b.js",
     "service-worker.js": "./service-worker.js",
-    "static/js/2.d9b8f823.chunk.js.LICENSE.txt": "./static/js/2.d9b8f823.chunk.js.LICENSE.txt",
+    "static/js/2.19158e75.chunk.js.LICENSE.txt": "./static/js/2.19158e75.chunk.js.LICENSE.txt",
     "static/media/typography.css": "./static/media/HKGrotesk-Regular.cab8839a.otf",
     "static/media/logo-naked.svg": "./static/media/logo-naked.cab1df1a.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.110be190.js",
-    "static/js/2.d9b8f823.chunk.js",
+    "static/js/2.19158e75.chunk.js",
     "static/css/main.d9bb5a70.chunk.css",
-    "static/js/main.d5df04da.chunk.js"
+    "static/js/main.ce388a8a.chunk.js"
   ]
 }
