@@ -31,7 +31,9 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.geph.android.proxbinder.Proxbinder;
@@ -116,17 +118,26 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     }
 
     @JavascriptInterface
-    public final void jsCheckAccount(final String uname, final String pwd, final String cbackString) {
+    public final void jsCheckAccount(final String uname, final String pwd, final String force, final String cbackString) {
         final Context ctx = this.getApplicationContext();
         final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
         new Thread(new Runnable() {
             public void run() {
                 final String daemonBinaryPath =
                         ctx.getApplicationInfo().nativeLibraryDir + "/libgeph.so";
-                ProcessBuilder pb = new ProcessBuilder(daemonBinaryPath, "sync",
-                        "--username", uname,
-                        "--password", pwd,
-                "--credential-cache", dbPath);
+                List<String> commands = new ArrayList<>();
+                commands.add(daemonBinaryPath);
+                commands.add("sync");
+                commands.add("--username");
+                commands.add(uname);
+                commands.add("--password");
+                commands.add(pwd);
+                commands.add("--credential-cache");
+                commands.add(dbPath);
+                if (force.equals("true")) {
+                    commands.add("--force");
+                }
+                ProcessBuilder pb = new ProcessBuilder(commands);
                 Log.e(TAG, "START CHECK");
                 final Process proc;
                 String retcode;
