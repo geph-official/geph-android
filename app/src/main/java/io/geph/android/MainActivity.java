@@ -10,6 +10,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
@@ -29,8 +35,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private String mUsername;
     private String mPassword;
     private String mExitName;
+    private String mExcludeAppsJson;
     private Boolean mBypassChinese;
     private Boolean mListenAll;
     private Boolean mForceBridges;
@@ -152,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                     }
                     Log.e(TAG, "DONE");
                     retcode = builder.toString();
+                    Log.e(TAG, retcode);
                 } catch (Exception e) {
                     retcode = "{'error': 'internal'}";
                 }
@@ -190,8 +204,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         }
         jsShowToast("stopped proxbinder " + pid);
     }
+
+
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges, String bypassChinese) {
+    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges, String bypassChinese, String excludeAppsJson) {
 //        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
 //        prefs.edit().putString(Constants.SP_USERNAME, uname)
 //                .putString(Constants.SP_PASSWORD, pwd)
@@ -205,12 +221,86 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mListenAll = listenAll.equals("true");
         mForceBridges = forceBridges.equals("true");
         mBypassChinese = bypassChinese.equals("true");
+        mExcludeAppsJson = excludeAppsJson;
         startVpn();
     }
     @JavascriptInterface
     public void jsStopDaemon() {
         stopVpn();
     }
+
+    @JavascriptInterface
+    public void jsGetAppList() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final PackageManager pm = getPackageManager();
+//get a list of installed apps.
+                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+                try {
+                    final JSONArray bigArray = new JSONArray();
+                    for (ApplicationInfo packageInfo : packages) {
+                        if ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 || packageInfo.packageName.equals(getApplicationContext().getPackageName())) {
+                            continue;
+                        }
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("packageName", packageInfo.packageName);
+                        jsonObject.put("friendlyName", packageInfo.loadLabel(pm));
+                        bigArray.put(jsonObject);
+                    }
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            try {
+                                mWebView.loadUrl("javascript:_ALIST_CALLBACK('" + Base64.encodeToString(bigArray.toString().getBytes("UTF-8"), Base64.DEFAULT) + "');void(0);");
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }catch(JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    @JavascriptInterface
+    public String jsGetAppIcon(String packageName) throws PackageManager.NameNotFoundException {
+        final PackageManager pm = getPackageManager();
+        Bitmap icon = drawableToBitmap(pm.getApplicationIcon(packageName));
+        String b64 = encodeToBase64(icon);
+        return "data:image/png;base64," + b64;
+    }
+
+    public static String encodeToBase64(Bitmap image)
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.PNG, 0, baos);
+        byte[] b = baos.toByteArray();
+        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
+        Log.e("LOOK", imageEncoded);
+        return imageEncoded;
+    }
+
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 1;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 1;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
 
     private Map<Integer, Proxbinder> pbMap = new HashMap<>();
 
@@ -335,6 +425,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
         startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mListenAll);
         startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINESE, mBypassChinese);
+        startTunnelVpn.putExtra(TunnelManager.EXCLUDE_APPS_JSON, mExcludeAppsJson);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");
             return;

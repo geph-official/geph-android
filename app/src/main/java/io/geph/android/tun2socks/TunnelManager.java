@@ -18,6 +18,10 @@ import android.support.v4.app.NotificationCompat;
 import android.system.Os;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -25,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.nio.Buffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +54,7 @@ public class TunnelManager  {
     public static final String LISTEN_ALL = "listenAll";
     public static final String FORCE_BRIDGES = "forceBridges";
     public static final String BYPASS_CHINESE = "bypassChinese";
+    public static final String EXCLUDE_APPS_JSON = "excludeAppsJson";
 
     private static final String LOG_TAG = "TunnelManager";
     private static final String CACHE_DIR_NAME = "geph";
@@ -68,6 +74,7 @@ public class TunnelManager  {
     private Boolean mListenAll;
     private Boolean mForceBridges;
     private Boolean mBypassChinese;
+    private String mExcludeAppsJson;
     private Process mDaemonProc;
     private AtomicBoolean m_isReconnecting;
 
@@ -97,6 +104,7 @@ public class TunnelManager  {
         mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false);
         mListenAll = intent.getBooleanExtra(LISTEN_ALL, false);
         mBypassChinese = intent.getBooleanExtra(BYPASS_CHINESE, false);
+        mExcludeAppsJson = intent.getStringExtra(EXCLUDE_APPS_JSON);
         Log.i(LOG_TAG, "onStartCommand parsed intent");
 
         if (setupAndRunDaemon() == null) {
@@ -181,7 +189,7 @@ public class TunnelManager  {
                 FileInputStream input = null;
                 FileOutputStream output = null;
                 try {
-                    try (InputStream stdout = mDaemonProc.getInputStream(); OutputStream stdin = mDaemonProc.getOutputStream()) {
+                    try (InputStream stdout = new BufferedInputStream(mDaemonProc.getInputStream(), 1048576); OutputStream stdin = mDaemonProc.getOutputStream()) {
                         Thread daemonStdin = null;
                         byte[] body = new byte[2048];
                         while (true) {
@@ -205,11 +213,16 @@ public class TunnelManager  {
                                     tunFd = null;
                                 }
                                 while (tunFd == null) {
-                                    tunFd = m_parentService.newBuilder().addAddress(addr, 10).
+                                    VpnService.Builder builder = m_parentService.newBuilder().addAddress(addr, 10).
                                             addRoute("0.0.0.0", 0).
                                             addDnsServer("74.82.42.42").
-                                            addDisallowedApplication(getContext().getPackageName())
-                                            .setBlocking(true)
+                                            addDisallowedApplication(getContext().getPackageName());
+                                    JSONArray excludedApps = new JSONArray(mExcludeAppsJson);
+                                    for (int i = 0; i < excludedApps.length(); i++) {
+                                        String packageName = excludedApps.getString(i);
+                                        builder.addDisallowedApplication(packageName);
+                                    }
+                                    tunFd = builder.setBlocking(true)
                                             .setMtu(1280)
                                             .establish();
                                 }
@@ -249,7 +262,7 @@ public class TunnelManager  {
                             }
                         }
                     }
-                } catch (IOException | PackageManager.NameNotFoundException | InterruptedException e) {
+                } catch (IOException | PackageManager.NameNotFoundException | InterruptedException | JSONException e) {
                     e.printStackTrace();
                 }
                 finally {
