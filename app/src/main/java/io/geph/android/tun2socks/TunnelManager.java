@@ -215,7 +215,7 @@ public class TunnelManager  {
                                 while (tunFd == null) {
                                     VpnService.Builder builder = m_parentService.newBuilder().addAddress(addr, 10).
                                             addRoute("0.0.0.0", 0).
-                                            addDnsServer("74.82.42.42").
+                                            addDnsServer("1.1.1.1").
                                             addDisallowedApplication(getContext().getPackageName());
                                     JSONArray excludedApps = new JSONArray(mExcludeAppsJson);
                                     for (int i = 0; i < excludedApps.length(); i++) {

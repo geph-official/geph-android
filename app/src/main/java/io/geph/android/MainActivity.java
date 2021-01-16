@@ -1,6 +1,7 @@
 package io.geph.android;
 
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private Boolean mListenAll;
     private Boolean mForceBridges;
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void bindActivity() {
         mWebView = findViewById(R.id.main_webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
         mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
-        mWebView.getSettings().setSupportMultipleWindows(true);
+        mWebView.getSettings().setSupportMultipleWindows(false);
         mWebView.setWebChromeClient(new WebChromeClient());
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
