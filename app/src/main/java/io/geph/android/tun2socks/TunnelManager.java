@@ -222,6 +222,9 @@ public class TunnelManager  {
                                         String packageName = excludedApps.getString(i);
                                         builder.addDisallowedApplication(packageName);
                                     }
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                        builder.setMetered(false);
+                                    }
                                     tunFd = builder.setBlocking(true)
                                             .setMtu(1280)
                                             .establish();
@@ -308,6 +311,8 @@ public class TunnelManager  {
             if (mListenAll) {
                 commands.add("--socks5-listen");
                 commands.add("0.0.0.0:9909");
+                commands.add("--http-listen");
+                commands.add("0.0.0.0:9910");
             }
             if (mForceBridges) {
                 commands.add("--use-bridges");
