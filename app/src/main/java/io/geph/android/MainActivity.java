@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private String mExitName;
     private String mExcludeAppsJson;
     private Boolean mBypassChinese;
+    private Boolean mUseTCP;
     private Boolean mListenAll;
     private Boolean mForceBridges;
 
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @JavascriptInterface
     public final void jsCheckAccount(final String uname, final String pwd, final String force, final String cbackString) {
         final Context ctx = this.getApplicationContext();
-        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials";
         new Thread(new Runnable() {
             public void run() {
                 final String daemonBinaryPath =
@@ -162,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                     StringBuilder builder = new StringBuilder();
                     String line = null;
                     while ( (line = reader.readLine()) != null) {
+                        Log.e(TAG, line);
                         builder.append(line);
                         builder.append(System.getProperty("line.separator"));
                     }
@@ -209,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
     @JavascriptInterface
-    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges, String bypassChinese, String excludeAppsJson) {
+    public void jsStartDaemon(String uname, String pwd, String exitName, String listenAll, String forceBridges, String useTCP, String bypassChinese, String excludeAppsJson) {
 //        SharedPreferences prefs = this.getSharedPreferences(Constants.PREFS, 0);
 //        prefs.edit().putString(Constants.SP_USERNAME, uname)
 //                .putString(Constants.SP_PASSWORD, pwd)
@@ -223,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mListenAll = listenAll.equals("true");
         mForceBridges = forceBridges.equals("true");
         mBypassChinese = bypassChinese.equals("true");
+        mUseTCP = useTCP.equals("true");
         mExcludeAppsJson = excludeAppsJson;
         startVpn();
     }
@@ -427,6 +430,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges);
         startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mListenAll);
         startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINESE, mBypassChinese);
+        startTunnelVpn.putExtra(TunnelManager.USE_TCP, mUseTCP);
         startTunnelVpn.putExtra(TunnelManager.EXCLUDE_APPS_JSON, mExcludeAppsJson);
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service");

@@ -54,6 +54,7 @@ public class TunnelManager  {
     public static final String LISTEN_ALL = "listenAll";
     public static final String FORCE_BRIDGES = "forceBridges";
     public static final String BYPASS_CHINESE = "bypassChinese";
+    public static final String USE_TCP = "useTCP";
     public static final String EXCLUDE_APPS_JSON = "excludeAppsJson";
 
     private static final String LOG_TAG = "TunnelManager";
@@ -74,6 +75,7 @@ public class TunnelManager  {
     private Boolean mListenAll;
     private Boolean mForceBridges;
     private Boolean mBypassChinese;
+    private Boolean mUseTCP;
     private String mExcludeAppsJson;
     private Process mDaemonProc;
     private AtomicBoolean m_isReconnecting;
@@ -104,6 +106,7 @@ public class TunnelManager  {
         mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false);
         mListenAll = intent.getBooleanExtra(LISTEN_ALL, false);
         mBypassChinese = intent.getBooleanExtra(BYPASS_CHINESE, false);
+        mUseTCP = intent.getBooleanExtra(USE_TCP, false);
         mExcludeAppsJson = intent.getStringExtra(EXCLUDE_APPS_JSON);
         Log.i(LOG_TAG, "onStartCommand parsed intent");
 
@@ -288,7 +291,7 @@ public class TunnelManager  {
         final Context ctx = getContext();
         final String daemonBinaryPath =
                 ctx.getApplicationInfo().nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR;
-        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials.db";
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials";
 
         try {
 //            Os.setenv("RUST_LOG", "debug,sosistab", true);
@@ -319,6 +322,9 @@ public class TunnelManager  {
             }
             if (mBypassChinese) {
                 commands.add("--exclude-prc");
+            }
+            if (mUseTCP) {
+                commands.add("--use-tcp");
             }
             Log.i(LOG_TAG, commands.toString());
             ProcessBuilder pb = new ProcessBuilder(commands);

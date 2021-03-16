@@ -126,3 +126,14 @@ app.on("activate", () => {
 try {
   app.dock.hide();
 } catch {}
+
+const isElevated = require("is-elevated");
+
+exports.isElevated = isElevated;
+
+exports.testTest = 123;
+
+// (async () => {
+//   alert(await isElevated());
+//   //=> false
+// })();
