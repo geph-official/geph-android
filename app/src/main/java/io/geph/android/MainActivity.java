@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     @JavascriptInterface
     public void jsGetAppList() {
-
+Log.e("TEST", "TEST");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -271,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                         jsonObject.put("friendlyName", packageInfo.loadLabel(pm));
                         bigArray.put(jsonObject);
                     }
+                    Log.e("TEST2", "TEST2");
                     runOnUiThread(new Runnable() {
                         public void run() {
                             try {
