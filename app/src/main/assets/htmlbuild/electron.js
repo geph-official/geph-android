@@ -1,4 +1,5 @@
-const { app, BrowserWindow, Tray } = require("electron");
+const { app, BrowserWindow, Tray, ipcMain } = require("electron");
+const { download } = require("electron-dl");
 app.commandLine.appendSwitch("disable-http-cache");
 const path = require("path");
 const url = require("url");
@@ -137,3 +138,14 @@ exports.testTest = 123;
 //   alert(await isElevated());
 //   //=> false
 // })();
+
+// DL handler
+ipcMain.on("download", (event, info) => {
+  download(
+    BrowserWindow.getFocusedWindow(),
+    info.url,
+    info.properties
+  ).then((dl) =>
+    window.webContents.send("download complete", dl.getSavePath())
+  );
+});

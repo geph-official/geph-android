@@ -3,18 +3,18 @@ apply plugin: 'com.android.application'
 android {
     lintOptions {
         checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
+        // Or, if you prefer, you can continue to check for errors in b release builds,
         // but continue the build even when errors are found:
         abortOnError false
     }
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion '29.0.2'
     defaultConfig {
         applicationId 'io.geph.android'
         minSdkVersion 21
-        targetSdkVersion 29
-        versionCode 10036
-        versionName '4.2.5'
+        targetSdkVersion 30
+        versionCode 10037
+        versionName '4.2.6'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'

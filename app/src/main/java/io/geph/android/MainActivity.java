@@ -3,6 +3,7 @@ package io.geph.android;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.DownloadManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ActivityNotFoundException;
@@ -21,6 +22,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -131,6 +133,21 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         mWebView.clearCache(true);
         mWebView.loadUrl("file:///android_asset/htmlbuild/index.html");
         //mWebView.loadUrl("http://10.0.2.2:8100/");
+    }
+
+    @JavascriptInterface
+    public final void jsExportLogs(final String fname) {
+        String boo = fname.replace(".", "-").replace("-tar", ".tar");
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://127.0.0.1:9809/debugpack"))
+                .setVisibleInDownloadsUi(true)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)// Visibility of the download Notification
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "debugpack.tar")
+                .setMimeType("application/x-tar")
+                .setAllowedOverMetered(true)// Set if download is allowed on Mobile network
+                .setAllowedOverRoaming(true);// Set if download is allowed on roaming network
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        assert manager != null;
+        manager.enqueue(request);
     }
 
     @JavascriptInterface
