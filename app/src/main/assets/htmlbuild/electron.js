@@ -1,9 +1,10 @@
 const { app, BrowserWindow, Tray, ipcMain } = require("electron");
-const { download } = require("electron-dl");
 app.commandLine.appendSwitch("disable-http-cache");
 const path = require("path");
 const url = require("url");
 const isDev = require("electron-is-dev");
+const { dialog } = require("electron");
+const fs = require("fs");
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -140,12 +141,12 @@ exports.testTest = 123;
 // })();
 
 // DL handler
-ipcMain.on("download", (event, info) => {
-  download(
-    BrowserWindow.getFocusedWindow(),
-    info.url,
-    info.properties
-  ).then((dl) =>
-    window.webContents.send("download complete", dl.getSavePath())
-  );
+ipcMain.on("exportLogs", (event, info) => {
+  const path = require("path");
+  const fname = dialog.showSaveDialogSync({
+    defaultPath: path.basename(info.filename),
+  });
+  if (fname) {
+    fs.copyFileSync(info.filename, fname);
+  }
 });

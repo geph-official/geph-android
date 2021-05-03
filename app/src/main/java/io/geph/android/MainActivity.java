@@ -44,7 +44,11 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     private static final String FRONT = "front";
     private static final long TOOLBAR_ACC_ANIM_DURATION = 500;
+    private static final int CREATE_FILE = 1;
 
     /**
      *
@@ -137,17 +142,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     @JavascriptInterface
     public final void jsExportLogs(final String fname) {
-        String boo = fname.replace(".", "-").replace("-tar", ".tar");
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://127.0.0.1:9809/debugpack"))
-                .setVisibleInDownloadsUi(true)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)// Visibility of the download Notification
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "debugpack.tar")
-                .setMimeType("application/x-tar")
-                .setAllowedOverMetered(true)// Set if download is allowed on Mobile network
-                .setAllowedOverRoaming(true);// Set if download is allowed on roaming network
-        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        assert manager != null;
-        manager.enqueue(request);
+        final Context ctx = this.getApplicationContext();
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TITLE, fname);
+        startActivityForResult(intent, CREATE_FILE);
     }
 
     @JavascriptInterface
@@ -417,6 +417,21 @@ Log.e("TEST", "TEST");
             if (resultCode == RESULT_OK) {
                 if (data.getBooleanExtra(Constants.RESTART_REQUIRED, false) && isServiceRunning()) {
                     restartVpn();
+                }
+            }
+        } else if (requestCode == CREATE_FILE) {
+            if (resultCode == RESULT_OK) {
+                Context ctx = getApplicationContext();
+                String logPath = ctx.getApplicationInfo().dataDir + "/logs.txt";
+                try (InputStream is = new FileInputStream(logPath); OutputStream os = getContentResolver().openOutputStream(data.getData())) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = is.read(buffer)) > 0) {
+                        assert os != null;
+                        os.write(buffer, 0, length);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }

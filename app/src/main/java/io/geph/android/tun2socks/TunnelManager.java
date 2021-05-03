@@ -309,6 +309,8 @@ public class TunnelManager  {
             commands.add("--dns-listen");
             commands.add("127.0.0.1:15353");
             commands.add("--stdio-vpn");
+            commands.add("--log-file");
+            commands.add(ctx.getApplicationInfo().dataDir + "/logs.txt");
 //            commands.add("-fakeDNS=true");
 //            commands.add("-dnsAddr=127.0.0.1:49983");
             if (mListenAll) {
