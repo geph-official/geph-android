@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "./static/css/main.d9bb5a70.chunk.css",
-    "main.js": "./static/js/main.58587e0a.chunk.js",
+    "main.js": "./static/js/main.fe7f5ba3.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.110be190.js",
     "static/css/2.7c0d52dc.chunk.css": "./static/css/2.7c0d52dc.chunk.css",
     "static/js/2.0d31f8af.chunk.js": "./static/js/2.0d31f8af.chunk.js",
     "index.html": "./index.html",
-    "precache-manifest.e282fadb573853d614388e3dfe4dc8cf.js": "./precache-manifest.e282fadb573853d614388e3dfe4dc8cf.js",
+    "precache-manifest.f44659716fc9d3005ea503186a7334ea.js": "./precache-manifest.f44659716fc9d3005ea503186a7334ea.js",
     "service-worker.js": "./service-worker.js",
     "static/js/2.0d31f8af.chunk.js.LICENSE.txt": "./static/js/2.0d31f8af.chunk.js.LICENSE.txt",
     "static/media/typography.css": "./static/media/HKGrotesk-Regular.cab8839a.otf",
@@ -18,6 +18,6 @@
     "static/css/2.7c0d52dc.chunk.css",
     "static/js/2.0d31f8af.chunk.js",
     "static/css/main.d9bb5a70.chunk.css",
-    "static/js/main.58587e0a.chunk.js"
+    "static/js/main.fe7f5ba3.chunk.js"
   ]
 }
