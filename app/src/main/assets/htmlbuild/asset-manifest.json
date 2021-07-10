@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "./static/css/main.d9bb5a70.chunk.css",
-    "main.js": "./static/js/main.fe7f5ba3.chunk.js",
+    "main.js": "./static/js/main.3f12a40b.chunk.js",
     "runtime-main.js": "./static/js/runtime-main.110be190.js",
     "static/css/2.7c0d52dc.chunk.css": "./static/css/2.7c0d52dc.chunk.css",
-    "static/js/2.0d31f8af.chunk.js": "./static/js/2.0d31f8af.chunk.js",
+    "static/js/2.c773f7c7.chunk.js": "./static/js/2.c773f7c7.chunk.js",
     "index.html": "./index.html",
-    "precache-manifest.f44659716fc9d3005ea503186a7334ea.js": "./precache-manifest.f44659716fc9d3005ea503186a7334ea.js",
+    "precache-manifest.d7afa80f6aea4988f45202c74e3ebe38.js": "./precache-manifest.d7afa80f6aea4988f45202c74e3ebe38.js",
     "service-worker.js": "./service-worker.js",
-    "static/js/2.0d31f8af.chunk.js.LICENSE.txt": "./static/js/2.0d31f8af.chunk.js.LICENSE.txt",
+    "static/js/2.c773f7c7.chunk.js.LICENSE.txt": "./static/js/2.c773f7c7.chunk.js.LICENSE.txt",
     "static/media/typography.css": "./static/media/HKGrotesk-Regular.cab8839a.otf",
     "static/media/logo-naked.svg": "./static/media/logo-naked.cab1df1a.svg",
     "static/media/windows-admin.jpg": "./static/media/windows-admin.b36c0ea1.jpg"
@@ -16,8 +16,8 @@
   "entrypoints": [
     "static/js/runtime-main.110be190.js",
     "static/css/2.7c0d52dc.chunk.css",
-    "static/js/2.0d31f8af.chunk.js",
+    "static/js/2.c773f7c7.chunk.js",
     "static/css/main.d9bb5a70.chunk.css",
-    "static/js/main.fe7f5ba3.chunk.js"
+    "static/js/main.3f12a40b.chunk.js"
   ]
 }

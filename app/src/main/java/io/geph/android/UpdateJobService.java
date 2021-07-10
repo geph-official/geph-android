@@ -32,6 +32,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Random;
+
 public class UpdateJobService extends JobService {
     private class Version implements Comparable<Version> {
 
@@ -104,6 +106,9 @@ public class UpdateJobService extends JobService {
         Log.d(TAG, "JOB STARTED");
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://gitlab.com/bunsim/geph-autoupdate/raw/master/stable.json";
+        if (new Random().nextBoolean()) {
+            url = "https://f001.backblazeb2.com/file/geph4-dl/stable.json";
+        }
         JsonObjectRequest stringRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 url, null, new Response.Listener<JSONObject>() {
