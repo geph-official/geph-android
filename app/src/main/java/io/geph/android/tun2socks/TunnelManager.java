@@ -291,7 +291,7 @@ public class TunnelManager  {
         final Context ctx = getContext();
         final String daemonBinaryPath =
                 ctx.getApplicationInfo().nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR;
-        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials";
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials-ng";
 
         try {
 //            Os.setenv("RUST_LOG", "debug,sosistab", true);

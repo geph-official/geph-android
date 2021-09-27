@@ -100,7 +100,7 @@ public class UpdateJobService extends JobService {
     }
 
     @Override
-    public boolean onStartJob(JobParameters params) {
+    public boolean onStartJob(final JobParameters params) {
         final UpdateJobService currService = this;
         final JobParameters jparams = params;
         Log.d(TAG, "JOB STARTED");
@@ -141,12 +141,14 @@ public class UpdateJobService extends JobService {
                     }
                 } catch (JSONException e) {
                     Log.d(TAG, e.toString());
+                } finally {
+                    jobFinished(params, false);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                // TODO
+                jobFinished(params, false);
             }
         });
         queue.add(stringRequest);

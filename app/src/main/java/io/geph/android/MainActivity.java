@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @JavascriptInterface
     public final void jsCheckAccount(final String uname, final String pwd, final String force, final String cbackString) {
         final Context ctx = this.getApplicationContext();
-        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials";
+        final String dbPath = ctx.getApplicationInfo().dataDir + "/geph4-credentials-ng";
         new Thread(new Runnable() {
             public void run() {
                 final String daemonBinaryPath =
@@ -186,9 +186,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
                     }
                     Log.e(TAG, "DONE");
                     retcode = builder.toString();
-                    Log.e(TAG, retcode);
+                    proc.waitFor();
+                    Log.e(TAG, "RETCODE: " + proc.exitValue() + retcode);
                 } catch (Exception e) {
-                    retcode = "{'error': 'internal'}";
+                    Log.e(TAG, e.toString());
+                    retcode = "{\"error\": \"internal\"}";
                 }
                 final String tocall = retcode;
                 Log.e(TAG, cbackString);
