@@ -1,0 +1,3 @@
+[submodule "gephgui"]
+	path = gephgui
+	url = https://github.com/geph-official/gephgui.git

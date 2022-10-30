@@ -1,20 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
+    ndkVersion "19.2.5345600"
     lintOptions {
         checkReleaseBuilds false
         // Or, if you prefer, you can continue to check for errors in b release builds,
         // but continue the build even when errors are found:
         abortOnError false
     }
-    compileSdkVersion 30
-    buildToolsVersion '29.0.2'
+    compileSdkVersion 33
     defaultConfig {
         applicationId 'io.geph.android'
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 10056
-        versionName '4.4.20'
+        targetSdkVersion 33
+        versionCode 10057
+        versionName '4.4.21'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -23,12 +23,16 @@ android {
     buildTypes {
         releaseAPK {
             buildConfigField "String", "BUILD_VARIANT", "\"apk\""
-            minifyEnabled = true
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
         }
 
         releasePlay {
             buildConfigField "String", "BUILD_VARIANT", "\"play\""
-            minifyEnabled = true
+            minifyEnabled false
+            shrinkResources false
+            debuggable true
         }
 
         debug {
@@ -43,6 +47,7 @@ android {
     }
     productFlavors {
     }
+    namespace 'io.geph.android'
 }
 
 dependencies {
@@ -57,6 +62,9 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation files('jna-5.9.0.aar')
+    implementation 'org.apache.commons:commons-text:1.9'
+
 }
 
 task copyGephBinaries(type: Copy) {

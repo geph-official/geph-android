@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export PREFIX="https://f001.backblazeb2.com/file/geph-dl/geph4-binaries/v4.4.20"
+export PREFIX="https://f001.backblazeb2.com/file/geph-dl/geph4-binaries/v4.6.0-beta.14"
 
 PREBUILD="./prebuild"
 # ABI names must match with arguments provided to android.defaultConfig.ndk.abiFilters
