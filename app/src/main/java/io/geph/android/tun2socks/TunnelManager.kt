@@ -204,8 +204,6 @@ class TunnelManager(parentService: TunnelVpnService?) {
         if ((mUseTCP)!!) {
             commands.add("--use-tcp")
         }
-        commands.add("--udp-shard-count")
-        commands.add("1")
         Log.i(LOG_TAG, commands.toString())
 
         val pb = ProcessBuilder(commands)
