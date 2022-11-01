@@ -59,9 +59,17 @@ window["NATIVE_GATE"] = {
     if (resp.error) {
       throw resp.error.message;
     }
-    console.log("BINDER RESULT", resp);
     return resp.result;
   },
+
+async binder_rpc(method, args) {
+  const req = { jsonrpc: "2.0", method: method, params: args, id: 1 };
+  const resp = await callRpc("binder_rpc", [JSON.stringify(req)]);
+  if (resp.error) {
+    throw resp.error.message;
+  }
+  return resp.result;
+},
   async sync_exits(username, password) {
     let sync_info = await callRpc("sync", [username, password]);
     return sync_info.exits;

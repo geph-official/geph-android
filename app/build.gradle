@@ -13,7 +13,7 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 11000
+        versionCode 11001
         versionName '4.6.0'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {

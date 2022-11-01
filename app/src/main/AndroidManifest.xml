@@ -33,6 +33,7 @@
             android:name=".UpdateJobService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service android:name=".UpdateService" />
+
         <service
             android:exported="true"
             android:name=".tun2socks.TunnelVpnService"

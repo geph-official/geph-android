@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                     );
                 };
             } catch (e: Exception) {
-                Log.d(TAG, "error is back");
+                Log.d(TAG, "error is back " + e.toString());
                 runOnUiThread {
                     wbview.evaluateJavascript(
                         cback + "[1](\"" + StringEscapeUtils.escapeEcmaScript(e.toString()) + "\")",
@@ -149,6 +149,10 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             "stop_daemon" -> {
                 // No-op, the RPC call already destroys the daemon
                 return "null"
+            }
+
+            "binder_rpc" -> {
+                return rpcBinder(args)
             }
 
             "daemon_rpc" -> {
@@ -187,6 +191,24 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         return "{}"
     }
 
+    fun rpcBinder(args: JSONArray): String {
+        val rawJsonString = args.getString(0);
+        Log.d("rpcBinder", rawJsonString);
+        val ctx = applicationContext;
+        val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
+        val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
+        val commands: MutableList<String> = ArrayList()
+        commands.add(daemonBinaryPath)
+        commands.add("binder-proxy")
+        val pb = ProcessBuilder(commands)
+        val proc = pb.start()
+        proc.outputStream.write(rawJsonString.toByteArray());
+        proc.outputStream.write("\n".toByteArray());
+        proc.outputStream.flush();
+        val reader = BufferedReader(InputStreamReader(proc.inputStream))
+        return reader.readLine()
+    }
+
     fun rpcSync(args: JSONArray): String {
         val ctx = applicationContext;
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
@@ -207,24 +229,19 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         Log.d(TAG, "START CHECK")
         val proc: Process
         var retcode: String
-        try {
-            proc = pb.start()
-            val reader = BufferedReader(InputStreamReader(proc.inputStream))
-            val builder = StringBuilder()
-            var line: String? = null
-            while (reader.readLine().also { line = it } != null) {
-                Log.e(TAG, line!!)
-                builder.append(line)
-                builder.append(System.getProperty("line.separator"))
-            }
-            Log.d(TAG, "DONE")
-            retcode = builder.toString()
-            proc.waitFor()
-            Log.d(TAG, "RETCODE: " + retcode)
-        } catch (e: Exception) {
-            Log.d(TAG, e.toString())
-            retcode = "{\"error\": \"internal\"}"
+        proc = pb.start()
+        val reader = BufferedReader(InputStreamReader(proc.inputStream))
+        val builder = StringBuilder()
+        var line: String? = null
+        while (reader.readLine().also { line = it } != null) {
+            Log.e(TAG, line!!)
+            builder.append(line)
+            builder.append(System.getProperty("line.separator"))
         }
+        Log.d(TAG, "DONE")
+        retcode = builder.toString()
+        proc.waitFor()
+        Log.d(TAG, "RETCODE: " + retcode)
         return retcode
     }
 
