@@ -2,7 +2,7 @@ package io.geph.android
 
 //import io.geph.android.tun2socks.TunnelManager.restartSocksProxyDaemon
 //import io.geph.android.tun2socks.TunnelManager.signalStopService
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.annotation.SuppressLint
 
 import org.json.JSONArray
@@ -16,7 +16,7 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.os.Bundle
 import io.geph.android.tun2socks.TunnelVpnService
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.annotation.TargetApi
 import android.os.Build
 import android.net.VpnService
@@ -27,11 +27,13 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Handler
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.webkit.*
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewAssetLoader.AssetsPathHandler
 import io.geph.android.tun2socks.TunnelState
 import java.io.*
 import java.lang.Exception
@@ -42,6 +44,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
+
 
 /**
  * @author j3sawyer
@@ -80,7 +83,26 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         wview.getSettings().setSupportMultipleWindows(false)
         WebView.setWebContentsDebuggingEnabled(true)
         wview.setWebChromeClient(WebChromeClient())
+        // asset loader
+        val assetLoader = WebViewAssetLoader.Builder().addPathHandler("/", AssetsPathHandler(this)).build();
         wview.setWebViewClient(object : WebViewClient() {
+            override fun shouldInterceptRequest(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): WebResourceResponse? {
+                if (request != null) {
+                    val resp = assetLoader.shouldInterceptRequest(request!!.getUrl());
+                    if (request.getUrl().toString().endsWith("js")) {
+                        if (resp != null) {
+                            resp.setMimeType("text/javascript");
+                        }
+                    }
+                    return resp;
+                } else {
+                    throw java.lang.RuntimeException("request is null")
+                }
+            }
+
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 val initJsString =
@@ -105,8 +127,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             }
         })
         wview.addJavascriptInterface(this, "Android")
-        wview.clearCache(true)
-        wview.loadUrl("file:///android_asset/htmlbuild/index.html")
+//        wview.clearCache(true)
+        wview.loadUrl("https://appassets.androidplatform.net/htmlbuild/index.html")
     }
 
     @JavascriptInterface
@@ -222,9 +244,9 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         commands.add(args.getString(1))
         commands.add("--credential-cache")
         commands.add(dbPath)
-//                    if (args.getBoolean(2)) {
-//                        commands.add("--force")
-//                    }
+        if (args.getBoolean(2)) {
+            commands.add("--force")
+        }
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
         val proc: Process
@@ -294,23 +316,13 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     private val pbMap: MutableMap<Int, Proxbinder> = HashMap()
-    private fun scheduleUpdateJob(context: Context) {
-        if (BuildConfig.BUILD_VARIANT != "play" && !updateScheduled) {
-            val serviceComponent = ComponentName(context, UpdateJobService::class.java)
-            val builder = JobInfo.Builder(0, serviceComponent)
-            builder.setPeriodic((20 * 60 * 1000).toLong())
-            val jobScheduler = context.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
-            jobScheduler.schedule(builder.build())
-            Log.d(TAG, "JOB SCHEDULED!!!!!!!!!!!!")
-            updateScheduled = true
-        }
-    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindActivity()
-        scheduleUpdateJob(applicationContext)
+
         val filter = IntentFilter()
         filter.addAction(TunnelVpnService.TUNNEL_VPN_DISCONNECT_BROADCAST)
         filter.addAction(TunnelVpnService.TUNNEL_VPN_START_BROADCAST)
@@ -367,6 +379,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PREPARE_VPN) {
             startTunnelService(applicationContext)
 //            if (resultCode == RESULT_OK) startTunnelService(applicationContext) else Log.e(

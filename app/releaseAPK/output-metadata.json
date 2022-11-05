@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "io.geph.android",
+  "variantName": "releaseAPK",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 11002,
+      "versionName": "4.6.0",
+      "outputFile": "app-releaseAPK.apk"
+    }
+  ],
+  "elementType": "File"
+}

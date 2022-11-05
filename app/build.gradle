@@ -13,30 +13,29 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 11001
+        versionCode 11002
         versionName '4.6.0'
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
     }
+
+
     buildTypes {
         releaseAPK {
-            buildConfigField "String", "BUILD_VARIANT", "\"apk\""
             minifyEnabled false
             shrinkResources false
-            debuggable true
+            debuggable false
         }
 
         releasePlay {
-            buildConfigField "String", "BUILD_VARIANT", "\"play\""
             minifyEnabled false
             shrinkResources false
-            debuggable true
+            debuggable false
         }
 
         debug {
-            buildConfigField "String", "BUILD_VARIANT", "\"debug\""
             debuggable true
         }
     }
@@ -52,18 +51,19 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.squareup.retrofit2:retrofit:2.2.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
-    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.android.volley:volley:1.1.0'
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation files('jna-5.9.0.aar')
     implementation 'org.apache.commons:commons-text:1.9'
+    implementation "androidx.webkit:webkit:1.5.0"
 
 }
 

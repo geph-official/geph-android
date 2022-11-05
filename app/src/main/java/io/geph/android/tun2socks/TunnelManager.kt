@@ -12,7 +12,7 @@ import android.graphics.BitmapFactory
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import android.system.Os
 import android.system.OsConstants.F_SETFD
 import android.util.Log

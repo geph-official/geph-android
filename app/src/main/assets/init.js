@@ -42,7 +42,7 @@ window["NATIVE_GATE"] = {
     }
   },
   async sync_user_info(username, password) {
-    let sync_info = await callRpc("sync", [username, password]);
+    let sync_info = await callRpc("sync", [username, password, false]);
     if (sync_info.user.subscription)
       return {
         level: sync_info.user.subscription.level.toLowerCase(),
@@ -71,9 +71,14 @@ async binder_rpc(method, args) {
   return resp.result;
 },
   async sync_exits(username, password) {
-    let sync_info = await callRpc("sync", [username, password]);
+    let sync_info = await callRpc("sync", [username, password, false]);
     return sync_info.exits;
   },
+
+    async purge_caches(username, password) {
+      await callRpc("sync", [username, password, true]);
+    },
+
 
   supports_app_whitelist: true,
 
