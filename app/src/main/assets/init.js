@@ -37,7 +37,7 @@ window["NATIVE_GATE"] = {
     try {
       await this.daemon_rpc("is_connected", []);
       return true;
-    } catch {
+    } catch (e) {
       return false;
     }
   },

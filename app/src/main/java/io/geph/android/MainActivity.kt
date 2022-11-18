@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Handler
+import android.system.Os
 import androidx.fragment.app.Fragment
 import android.util.Base64
 import android.util.Log
@@ -43,6 +44,7 @@ import java.util.HashMap
 import org.apache.commons.text.StringEscapeUtils;
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import kotlin.concurrent.thread
 
 
@@ -77,8 +79,6 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val wview = mWebView!!;
         wview.getSettings().javaScriptEnabled = true
         wview.getSettings().domStorageEnabled = true
-        wview.getSettings().allowFileAccessFromFileURLs = true
-        wview.getSettings().allowUniversalAccessFromFileURLs = true
         wview.getSettings().javaScriptCanOpenWindowsAutomatically = true
         wview.getSettings().setSupportMultipleWindows(false)
         WebView.setWebContentsDebuggingEnabled(true)
@@ -103,8 +103,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                 }
             }
 
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
                 val initJsString =
                     application.assets.open("init.js").bufferedReader().use { it.readText() };
                 wview.evaluateJavascript(initJsString, null);
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             ): Boolean {
                 val url = request.url.toString()
                 Log.e(TAG, url)
-                if (url.contains("file")) {
+                if (url.contains("appassets.androidplatform.net")) {
                     return false
                 } else {
                     val i = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                 Log.d(TAG, "error is back " + e.toString());
                 runOnUiThread {
                     wbview.evaluateJavascript(
-                        cback + "[1](\"" + StringEscapeUtils.escapeEcmaScript(e.toString()) + "\")",
+                        cback + "[1](\"" + StringEscapeUtils.escapeEcmaScript(e.message) + "\")",
                         null
                     );
                 }
@@ -232,6 +232,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     fun rpcSync(args: JSONArray): String {
+        Os.setenv("RUST_LOG", "error", true)
         val ctx = applicationContext;
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
         val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
@@ -262,7 +263,12 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         }
         Log.d(TAG, "DONE")
         retcode = builder.toString()
+        val stderr = BufferedReader(InputStreamReader(proc.errorStream)).readLine();
         proc.waitFor()
+        if (stderr != null && stderr.length > 10) {
+            Log.e(TAG, "stderr: " + stderr);
+            throw java.lang.RuntimeException(stderr.trim())
+        }
         Log.d(TAG, "RETCODE: " + retcode)
         return retcode
     }
