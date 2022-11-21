@@ -26,6 +26,7 @@ import io.geph.android.tun2socks.TunnelManager
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build.VERSION
 import android.os.Handler
 import android.system.Os
 import androidx.fragment.app.Fragment
@@ -129,6 +130,21 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         wview.addJavascriptInterface(this, "Android")
 //        wview.clearCache(true)
         wview.loadUrl("https://appassets.androidplatform.net/htmlbuild/index.html")
+    }
+
+    @JavascriptInterface
+    fun jsVersion(): String {
+        return BuildConfig.VERSION_NAME
+    }
+
+    @JavascriptInterface
+    fun jsHasPlay(): String {
+        try {
+            application.packageManager.getPackageInfo("com.android.vending", 0)
+            return "true"
+        } catch (e: Exception) {
+            return "false"
+        }
     }
 
     @JavascriptInterface

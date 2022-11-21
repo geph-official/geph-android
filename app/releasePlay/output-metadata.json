@@ -11,7 +11,7 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 11002,
+      "versionCode": 11003,
       "versionName": "4.6.0",
       "outputFile": "app-releasePlay.apk"
     }

@@ -95,4 +95,13 @@ async binder_rpc(method, args) {
   async export_debug_pack() {
     await callRpc("export_logs", []);
   },
+  supports_autoupdate: JSON.parse(window.Android.jsHasPlay()),
+
+  async get_native_info() {
+        return {
+          platform_type: "android",
+          platform_details: "Android",
+          version: window.Android.jsVersion(),
+        };
+  }
 };
