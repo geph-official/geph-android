@@ -21,7 +21,6 @@ import com.sun.jna.Native
 import io.geph.android.MainActivity
 import io.geph.android.R
 import org.json.JSONArray
-import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
@@ -52,7 +51,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
     private var mListenAll: Boolean? = null
     private var mForceBridges: Boolean? = null
     private var mBypassChinese: Boolean? = null
-    private var mUseTCP: Boolean? = null
+    private var mForceProtocol: String? = null
     private var mExcludeAppsJson: String? = null
     private var mDaemonProc: Process? = null
     private val m_isReconnecting: AtomicBoolean
@@ -65,20 +64,23 @@ class TunnelManager(parentService: TunnelVpnService?) {
             return 0
         }
         Log.i(LOG_TAG, "onStartCommand")
-        mSocksServerAddressBase = intent.getStringExtra(SOCKS_SERVER_ADDRESS_BASE)
-        mSocksServerPort = intent.getStringExtra(SOCKS_SERVER_PORT_EXTRA)
+
+        val prefs = context!!.getSharedPreferences("daemon", Context.MODE_PRIVATE);
+
+        mSocksServerAddressBase = prefs.getString(SOCKS_SERVER_ADDRESS_BASE, "")
+        mSocksServerPort = prefs.getString(SOCKS_SERVER_PORT_EXTRA, "")
         mSocksServerAddress = "$mSocksServerAddressBase:$mSocksServerPort"
-        mDnsServerPort = intent.getStringExtra(DNS_SERVER_PORT_EXTRA)
+        mDnsServerPort = prefs.getString(DNS_SERVER_PORT_EXTRA, "")
         mDnsResolverAddress = "$mSocksServerAddressBase:$mDnsServerPort"
         Log.i(LOG_TAG, "onStartCommand parsed some stuff")
-        mUsername = intent.getStringExtra(USERNAME)
-        mPassword = intent.getStringExtra(PASSWORD)
-        mExitName = intent.getStringExtra(EXIT_NAME)
-        mForceBridges = intent.getBooleanExtra(FORCE_BRIDGES, false)
-        mListenAll = intent.getBooleanExtra(LISTEN_ALL, false)
-        mBypassChinese = intent.getBooleanExtra(BYPASS_CHINESE, false)
-        mUseTCP = intent.getBooleanExtra(USE_TCP, false)
-        mExcludeAppsJson = intent.getStringExtra(EXCLUDE_APPS_JSON)
+        mUsername = prefs.getString(USERNAME, "")
+        mPassword = prefs.getString(PASSWORD, "")
+        mExitName = prefs.getString(EXIT_NAME, "")
+        mForceBridges = prefs.getBoolean(FORCE_BRIDGES, false)
+        mListenAll = prefs.getBoolean(LISTEN_ALL, false)
+        mBypassChinese = prefs.getBoolean(BYPASS_CHINESE, false)
+        mForceProtocol = prefs.getString(FORCE_PROTOCOL, "")
+        mExcludeAppsJson = prefs.getString(EXCLUDE_APPS_JSON, "")
         Log.i(LOG_TAG, "onStartCommand parsed intent")
         setupAndRunDaemon();
         if (mSocksServerAddress == null) {
@@ -141,19 +143,19 @@ class TunnelManager(parentService: TunnelVpnService?) {
         tunFd = newFd;
         val newProc = runDaemon(newFd);
         mDaemonProc = newProc;
-//        val daemonLogs = Thread(Runnable {
-//            val tag = "Geph"
-//            val err = newProc.errorStream
-//            val scanner = Scanner(err)
-//            while (scanner.hasNextLine()) {
-//                val line = scanner.nextLine()
-//                Log.d(tag, line)
-//            }
-//            Log.d(tag, "stopping log stuff because the process died")
-//            vpnService!!.stopForeground(true)
-//            exitProcess(0)
-//        })
-//        daemonLogs.start();
+        val daemonLogs = Thread(Runnable {
+            val tag = "Geph"
+            val err = newProc.errorStream
+            val scanner = Scanner(err)
+            while (scanner.hasNextLine()) {
+                val line = scanner.nextLine()
+                Log.d(tag, line)
+            }
+            Log.d(tag, "stopping log stuff because the process died")
+            vpnService!!.stopForeground(true)
+            exitProcess(0)
+        })
+        daemonLogs.start();
         thread {
             newProc.waitFor();
             exitProcess(0)
@@ -166,7 +168,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
     private fun runDaemon(tunFd: ParcelFileDescriptor): Process {
         val ctx = context
         val daemonBinaryPath = ctx!!.applicationInfo.nativeLibraryDir + "/" + DAEMON_IN_NATIVELIB_DIR
-        val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
+        val credentialsDbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
+        val debugpackDbPath = ctx.applicationInfo.dataDir + "/geph4-debugpack.db"
         val commands: MutableList<String?> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("connect")
@@ -177,7 +180,9 @@ class TunnelManager(parentService: TunnelVpnService?) {
         commands.add("--exit-server")
         commands.add(mExitName)
         commands.add("--credential-cache")
-        commands.add(dbPath)
+        commands.add(credentialsDbPath)
+        commands.add("--debugpack-path")
+        commands.add(debugpackDbPath)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val fd = tunFd.detachFd();
             var hoho = Native.load(LibC::class.java);
@@ -187,7 +192,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
             commands.add("inherited-fd");
             Os.setenv("GEPH_VPN_FD", "0", true)
         } else {
-            throw java.lang.RuntimeException("does not support true stdio mode yet")
+            commands.add("--vpn-mode");
+            commands.add("stdio");
         }
         if ((mListenAll)!!) {
             commands.add("--socks5-listen")
@@ -201,15 +207,16 @@ class TunnelManager(parentService: TunnelVpnService?) {
         if ((mBypassChinese)!!) {
             commands.add("--exclude-prc")
         }
-        if ((mUseTCP)!!) {
-            commands.add("--use-tcp")
+        if (mForceProtocol != null && mForceProtocol!!.length > 0 && mForceProtocol != "null") {
+            Log.d(LOG_TAG, "mForceProtocol = " + mForceProtocol)
+            commands.add("--force-protocol")
+            commands.add(mForceProtocol)
         }
         Log.i(LOG_TAG, commands.toString())
 
         val pb = ProcessBuilder(commands)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)  {
-            val logPath = ctx.applicationInfo.dataDir + "/logs.txt"
-            return pb.redirectError(ProcessBuilder.Redirect.appendTo(File(logPath))).redirectInput(ProcessBuilder.Redirect.INHERIT).start()
+            return pb.redirectInput(ProcessBuilder.Redirect.INHERIT).start()
         } else {
             val child = pb.start();
             val childStdout = child.inputStream;
@@ -220,7 +227,6 @@ class TunnelManager(parentService: TunnelVpnService?) {
             Thread {
                 val body = ByteArray(2048);
                 while(true) {
-                    val kind = childStdout.read();
                     val bodylen1 = childStdout.read();
                     val bodylen2 = childStdout.read();
                     val bodylen = bodylen1 + bodylen2*256;
@@ -228,20 +234,17 @@ class TunnelManager(parentService: TunnelVpnService?) {
                     while (n < bodylen) {
                         n += childStdout.read(body, n, bodylen - n);
                     }
-                    if (kind == 0) {
-                        output.write(body, 0, bodylen);
-                    }
+                    output.write(body, 0, bodylen);
                 }
             }.start();
             // upload
             Thread {
                 val body = ByteArray(2048);
                 while(true) {
-                    val n = input.read(body, 3, 2045);
-                    body[0] = 0;
-                    body[1] = (n % 256).toByte();
-                    body[2] = (n / 256).toByte();
-                    childStdin.write(body, 0, n+3);
+                    val n = input.read(body, 2, 2046);
+                    body[0] = (n % 256).toByte();
+                    body[1] = (n / 256).toByte();
+                    childStdin.write(body, 0, n+2);
                     childStdin.flush();
                 }
             }.start()
@@ -357,7 +360,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
         @JvmField
         val BYPASS_CHINESE = "bypassChinese"
         @JvmField
-        val USE_TCP = "useTCP"
+        val FORCE_PROTOCOL = "forceProtocol"
         @JvmField
         val EXCLUDE_APPS_JSON = "excludeAppsJson"
         private val LOG_TAG = "TunnelManager"

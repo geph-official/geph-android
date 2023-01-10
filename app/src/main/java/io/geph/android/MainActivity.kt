@@ -2,50 +2,42 @@ package io.geph.android
 
 //import io.geph.android.tun2socks.TunnelManager.restartSocksProxyDaemon
 //import io.geph.android.tun2socks.TunnelManager.signalStopService
-import androidx.appcompat.app.AppCompatActivity
-import android.annotation.SuppressLint
 
-import org.json.JSONArray
-import org.json.JSONObject
-import android.widget.Toast
-import io.geph.android.proxbinder.Proxbinder
-import android.content.pm.PackageManager
-import android.content.pm.ApplicationInfo
-import android.graphics.Bitmap
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.os.Bundle
-import io.geph.android.tun2socks.TunnelVpnService
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.os.Build
-import android.net.VpnService
 import android.content.*
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Canvas
-import io.geph.android.tun2socks.TunnelManager
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build.VERSION
+import android.net.VpnService
+import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.system.Os
-import androidx.fragment.app.Fragment
 import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.webkit.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewAssetLoader.AssetsPathHandler
+import io.geph.android.proxbinder.Proxbinder
+import io.geph.android.tun2socks.TunnelManager
 import io.geph.android.tun2socks.TunnelState
+import io.geph.android.tun2socks.TunnelVpnService
+import org.apache.commons.text.StringEscapeUtils
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.*
-import java.lang.Exception
-import java.lang.StringBuilder
-import java.util.ArrayList
-import java.util.HashMap
-import org.apache.commons.text.StringEscapeUtils;
 import java.net.HttpURLConnection
 import java.net.URL
-import java.nio.charset.StandardCharsets
 import kotlin.concurrent.thread
 
 
@@ -69,7 +61,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     private var mExitName: String? = null
     private var mExcludeAppsJson: String? = null
     private val mBypassChinese: Boolean? = null
-    private var mUseTCP: Boolean? = null
+    private var mForceProtocol: String? = null
     private var mListenAll: Boolean? = null
     private var mForceBridges: Boolean? = null
     private var syncStatusJson: String? = null
@@ -296,7 +288,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         mListenAll = args.getBoolean("listen_all")
         mForceBridges = args.getBoolean("force_bridges")
         //mBypassChinese = bypassChinese.equals("true");
-        mUseTCP = false
+        mForceProtocol = args.getString("force_protocol")
         mExcludeAppsJson = args.getJSONArray("app_whitelist").toString()
         Log.d("EXCLUDEAPPS", mExcludeAppsJson!!)
         startVpn()
@@ -307,8 +299,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val ctx = this.applicationContext
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "text/plain"
-        intent.putExtra(Intent.EXTRA_TITLE, "geph-debug.txt")
+        intent.type = "application/vnd.sqlite3"
+        intent.putExtra(Intent.EXTRA_TITLE, "geph-debugpack.db")
         startActivityForResult(intent, CREATE_FILE)
     }
 
@@ -417,11 +409,28 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         } else if (requestCode == CREATE_FILE) {
             if (resultCode == RESULT_OK) {
                 val ctx = applicationContext
-                val logPath = ctx.applicationInfo.dataDir + "/logs.txt"
+                val daemonBinaryPath: String = applicationInfo.nativeLibraryDir + "/libgeph.so"
+                val debugPackPath = applicationInfo.dataDir + "/geph4-debugpack.db"
+                val debugPackExportedPath = applicationInfo.dataDir + "/geph4-debugpack-exported.db"
+                val pb = ProcessBuilder(daemonBinaryPath, "debugpack", "--export-to", debugPackExportedPath, "--debugpack-path", debugPackPath)
+                Thread {
+                    Log.d(TAG, "export process started from " + debugPackPath  + " => " + debugPackExportedPath);
+                    try {
+//                        pb.inheritIO();
+                        Log.d(TAG, "export gonna start the process");
+                        val process = pb.start()
+                        Log.d(TAG, "export gonna wait for process to return");
+                        val retval = process.waitFor()
+                        Log.d(TAG, "export process returned " + retval.toString());
+                    } catch (e: IOException) {
+                        Log.d(TAG, "export about to do failure");
+                        Log.e(TAG, "Export debugpack failed " + e.message!!)
+                        e.printStackTrace()
+                    }
                 try {
-                    FileInputStream(logPath).use { `is` ->
+                    FileInputStream(debugPackExportedPath).use { `is` ->
                         contentResolver.openOutputStream(
-                            data!!.data!!
+                                data!!.data!!
                         ).use { os ->
                             val buffer = ByteArray(1024)
                             var length: Int
@@ -434,6 +443,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
+                }.start()
+
             }
         }
     }
@@ -446,18 +457,27 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     protected fun startTunnelService(context: Context?) {
         Log.i(TAG, "starting tunnel service")
         val startTunnelVpn = Intent(context, TunnelVpnService::class.java)
-        startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress)
-        startTunnelVpn.putExtra(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort)
-        startTunnelVpn.putExtra(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort)
-        startTunnelVpn.putExtra(TunnelManager.USERNAME, mUsername)
-        startTunnelVpn.putExtra(TunnelManager.PASSWORD, mPassword)
-        startTunnelVpn.putExtra(TunnelManager.EXIT_NAME, mExitName)
-        Log.d(TAG, mExitName!!)
-        startTunnelVpn.putExtra(TunnelManager.FORCE_BRIDGES, mForceBridges)
-        startTunnelVpn.putExtra(TunnelManager.LISTEN_ALL, mListenAll)
-        startTunnelVpn.putExtra(TunnelManager.BYPASS_CHINESE, mBypassChinese)
-        startTunnelVpn.putExtra(TunnelManager.USE_TCP, mUseTCP)
-        startTunnelVpn.putExtra(TunnelManager.EXCLUDE_APPS_JSON, mExcludeAppsJson)
+        Log.d(TAG, "*** GONNA SET PREFERENCES ***  "+ (context == null).toString())
+        val prefs = context!!.getSharedPreferences("daemon", Context.MODE_PRIVATE);
+        Log.d(TAG, "*** REALLY GONNA SET PREFERENCES ***  ")
+        with (prefs.edit()) {
+            putString(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress)
+            putString(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort)
+            putString(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort)
+            putString(TunnelManager.USERNAME, mUsername)
+            putString(TunnelManager.PASSWORD, mPassword)
+            putString(TunnelManager.EXIT_NAME, mExitName)
+            Log.d(TAG, "*** mForceBridges *** "  + mForceBridges.toString())
+            putBoolean(TunnelManager.FORCE_BRIDGES, mForceBridges!!)
+            Log.d(TAG, "*** mListenAll *** "  + mListenAll.toString())
+            putBoolean(TunnelManager.LISTEN_ALL, mListenAll!!)
+            putString(TunnelManager.FORCE_PROTOCOL, mForceProtocol)
+            putString(TunnelManager.EXCLUDE_APPS_JSON, mExcludeAppsJson)
+            apply()
+        }
+
+        Log.d(TAG, "*** SET PREFERENCES ***")
+
         if (startService(startTunnelVpn) == null) {
             Log.d(TAG, "failed to start tunnel vpn service")
             return
