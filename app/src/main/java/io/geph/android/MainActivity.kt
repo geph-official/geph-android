@@ -473,7 +473,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             putBoolean(TunnelManager.LISTEN_ALL, mListenAll!!)
             putString(TunnelManager.FORCE_PROTOCOL, mForceProtocol)
             putString(TunnelManager.EXCLUDE_APPS_JSON, mExcludeAppsJson)
-            apply()
+            commit()
         }
 
         Log.d(TAG, "*** SET PREFERENCES ***")
