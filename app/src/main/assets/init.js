@@ -81,6 +81,8 @@ async binder_rpc(method, args) {
 
 
   supports_app_whitelist: true,
+    supports_listen_all: true,
+
 
   async sync_app_list() {
     const result = await callRpc("get_app_list", []);

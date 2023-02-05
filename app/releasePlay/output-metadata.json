@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 11013,
-      "versionName": "4.7.2-rc.3",
+      "versionCode": 11017,
+      "versionName": "4.7.4-alpha.2",
       "outputFile": "app-releasePlay.apk"
     }
   ],

@@ -13,8 +13,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 11013
-        versionName '4.7.2-rc.3'
+        versionCode 11018
+        versionName '4.7.5'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'

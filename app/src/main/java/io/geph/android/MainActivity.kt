@@ -271,12 +271,19 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         }
         Log.d(TAG, "DONE")
         retcode = builder.toString()
-        val stderr = BufferedReader(InputStreamReader(proc.errorStream)).readLine();
-        proc.waitFor()
+        val lines = BufferedReader(InputStreamReader(proc.errorStream));
+        while (true) {
+        val stderr = lines.readLine();
         if (stderr != null && stderr.length > 10) {
             Log.e(TAG, "stderr: " + stderr);
-            throw java.lang.RuntimeException(stderr.trim())
+            if (!stderr.contains("linker") && !stderr.contains("CANNOT LINK")) {
+                throw java.lang.RuntimeException(stderr.trim())
+            }
+        } else if (stderr == null) {
+            break;
         }
+        }
+        proc.waitFor()
         Log.d(TAG, "RETCODE: " + retcode)
         return retcode
     }
