@@ -65,8 +65,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
         }
         Log.i(LOG_TAG, "onStartCommand")
 
-        val prefs = context!!.getSharedPreferences("daemon", Context.MODE_PRIVATE);
 
+        val prefs = context!!.getSharedPreferences("daemon", Context.MODE_PRIVATE);
         mSocksServerAddressBase = prefs.getString(SOCKS_SERVER_ADDRESS_BASE, "")
         mSocksServerPort = prefs.getString(SOCKS_SERVER_PORT_EXTRA, "")
         mSocksServerAddress = "$mSocksServerAddressBase:$mSocksServerPort"
@@ -183,6 +183,15 @@ class TunnelManager(parentService: TunnelVpnService?) {
         commands.add(credentialsDbPath)
         commands.add("--debugpack-path")
         commands.add(debugpackDbPath)
+
+        val rpc_key = context!!.getSharedPreferences("GEPH_RPC_KEY", Context.MODE_PRIVATE)
+            .getString("GEPH_RPC_KEY", "key-" + UUID.randomUUID().toString())!!;
+        with (context!!.getSharedPreferences("GEPH_RPC_KEY", Context.MODE_PRIVATE).edit()) {
+            Log.i("RPC_KEY", rpc_key);
+            putString("GEPH_RPC_KEY", rpc_key)
+            commit()
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val fd = tunFd.detachFd();
             var hoho = Native.load(LibC::class.java);
@@ -191,6 +200,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
             commands.add("--vpn-mode")
             commands.add("inherited-fd");
             Os.setenv("GEPH_VPN_FD", "0", true)
+            Os.setenv("GEPH_RPC_KEY", rpc_key, true)
         } else {
             commands.add("--vpn-mode");
             commands.add("stdio");

@@ -38,6 +38,9 @@ import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
 
@@ -186,25 +189,34 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             }
 
             "daemon_rpc" -> {
-                val rawJsonString = args.getString(0);
-                with(URL("http://127.0.0.1:9809").openConnection() as HttpURLConnection) {
-                    requestMethod = "POST"
-
-                    val wr = OutputStreamWriter(outputStream);
-                    wr.write(rawJsonString)
-                    wr.flush()
-
-                    BufferedReader(InputStreamReader(inputStream)).use {
-                        val response = StringBuffer()
-
-                        var inputLine = it.readLine()
-                        while (inputLine != null) {
-                            response.append(inputLine)
-                            inputLine = it.readLine()
-                        }
-                        return response.toString()
-                    }
+                val rpc_key = baseContext.getSharedPreferences("GEPH_RPC_KEY", Context.MODE_PRIVATE)
+                    .getString("GEPH_RPC_KEY", "key-" + UUID.randomUUID().toString())!!;
+                with (baseContext.getSharedPreferences("GEPH_RPC_KEY", Context.MODE_PRIVATE).edit()) {
+                    android.util.Log.i("RPC_KEY_2", rpc_key);
+                    putString("GEPH_RPC_KEY", rpc_key)
+                    commit()
                 }
+
+                    val rawJsonString = args.getString(0);
+                    with(URL("http://127.0.0.1:9809/" + rpc_key).openConnection() as HttpURLConnection) {
+                        requestMethod = "POST"
+
+                        val wr = OutputStreamWriter(outputStream);
+                        wr.write(rawJsonString)
+                        wr.flush()
+
+                        BufferedReader(InputStreamReader(inputStream)).use {
+                            val response = StringBuffer()
+
+                            var inputLine = it.readLine()
+                            while (inputLine != null) {
+                                response.append(inputLine)
+                                inputLine = it.readLine()
+                            }
+                            return response.toString()
+                        }
+                    }
+
             }
 
             "get_app_list" -> {
