@@ -259,15 +259,16 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val commands: MutableList<String> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("sync")
-        commands.add("--username")
-        commands.add(args.getString(0))
-        commands.add("--password")
-        commands.add(args.getString(1))
         commands.add("--credential-cache")
         commands.add(dbPath)
         if (args.getBoolean(2)) {
             commands.add("--force")
         }
+        commands.add("auth-password")
+        commands.add("--username")
+        commands.add(args.getString(0))
+        commands.add("--password")
+        commands.add(args.getString(1))
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
         val proc: Process

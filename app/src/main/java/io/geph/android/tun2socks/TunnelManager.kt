@@ -173,12 +173,6 @@ class TunnelManager(parentService: TunnelVpnService?) {
         val commands: MutableList<String?> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("connect")
-        commands.add("--username")
-        commands.add(mUsername)
-        commands.add("--password")
-        commands.add(mPassword)
-        commands.add("--exit-server")
-        commands.add(mExitName)
         commands.add("--credential-cache")
         commands.add(credentialsDbPath)
         commands.add("--debugpack-path")
@@ -222,6 +216,16 @@ class TunnelManager(parentService: TunnelVpnService?) {
             commands.add("--force-protocol")
             commands.add(mForceProtocol)
         }
+
+        commands.add("--exit-server")
+        commands.add(mExitName)
+
+        commands.add("auth-password")
+        commands.add("--username")
+        commands.add(mUsername)
+        commands.add("--password")
+        commands.add(mPassword)
+
         Log.i(LOG_TAG, commands.toString())
 
         val pb = ProcessBuilder(commands)

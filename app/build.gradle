@@ -14,7 +14,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         versionCode 11024
-        versionName '4.7.12'
+        versionName '4.7.13-13-g6f8cc5f'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
