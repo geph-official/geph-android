@@ -21,7 +21,9 @@ import com.sun.jna.Native
 import io.geph.android.MainActivity
 import io.geph.android.R
 import io.geph.android.utils.RpcAuthKind
+import io.geph.android.utils.RpcAuthKind.fromJSON
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
@@ -74,8 +76,9 @@ class TunnelManager(parentService: TunnelVpnService?) {
         mDnsResolverAddress = "$mSocksServerAddressBase:$mDnsServerPort"
         Log.i(LOG_TAG, "onStartCommand parsed some stuff")
 
-        // TODO deserialize into authkind type
-        authKind = prefs.getString(AUTH_KIND, null)
+        val authKindJSON = JSONObject(prefs.getString(AUTH_KIND, "")!!)
+        authKind = fromJSON(authKindJSON)
+
         mExitName = prefs.getString(EXIT_NAME, "")
         mForceBridges = prefs.getBoolean(FORCE_BRIDGES, false)
         mListenAll = prefs.getBoolean(LISTEN_ALL, false)
@@ -221,11 +224,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
         commands.add("--exit-server")
         commands.add(mExitName)
 
-        commands.add("auth-password")
-        commands.add("--username")
-        commands.add(mUsername)
-        commands.add("--password")
-        commands.add(mPassword)
+        val flags = authKind!!.flags
+        commands.addAll(flags)
 
         Log.i(LOG_TAG, commands.toString())
 
@@ -364,10 +364,6 @@ class TunnelManager(parentService: TunnelVpnService?) {
         val DNS_SERVER_PORT_EXTRA = "dnsServerPort"
         @JvmField
         val AUTH_KIND = "authKind"
-        @JvmField
-        val USERNAME = "username"
-        @JvmField
-        val PASSWORD = "password"
         @JvmField
         val EXIT_NAME = "exitName"
         @JvmField

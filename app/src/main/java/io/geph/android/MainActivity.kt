@@ -20,7 +20,6 @@ import android.os.Handler
 import android.system.Os
 import android.util.Base64
 import android.util.Log
-import android.view.View
 import android.webkit.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -50,7 +49,7 @@ import kotlin.concurrent.thread
 /**
  * @author j3sawyer
  */
-class MainActivity : AppCompatActivity(), MainActivityInterface {
+open class MainActivity : AppCompatActivity(), MainActivityInterface {
     private var mUiHandler: Handler? = null
     private var mWebView: WebView? = null
     private var vpnReceiver: Receiver? = null
@@ -249,8 +248,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val ctx = applicationContext;
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
         val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
+        val authKind = fromJSON(args.getJSONObject(0))
 
-        val authKind= deserializeRpcAuthKind(args.getJSONObject(0))
         val commands: MutableList<String> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("sync")
@@ -259,16 +258,15 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         if (args.getBoolean(2)) {
             commands.add("--force")
         }
-        commands.add("auth-password")
+
         val authFlags = authKind.flags
         commands.addAll(authFlags)
 
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
-        val proc: Process
         var retcode: String
-        proc = pb.start()
-        val reader = BufferedReader(InputStreamReader(proc.inputStream))
+        val process: Process = pb.start()
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
         val builder = StringBuilder()
         var line: String? = null
         while (reader.readLine().also { line = it } != null) {
@@ -278,11 +276,11 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         }
         Log.d(TAG, "DONE")
         retcode = builder.toString()
-        val lines = BufferedReader(InputStreamReader(proc.errorStream));
+        val lines = BufferedReader(InputStreamReader(process.errorStream));
         while (true) {
         val stderr = lines.readLine();
         if (stderr != null && stderr.length > 10) {
-            Log.e(TAG, "stderr: " + stderr);
+            Log.e(TAG, "stderr: $stderr");
             if (!stderr.contains("linker") && !stderr.contains("CANNOT LINK")) {
                 throw java.lang.RuntimeException(stderr.trim())
             }
@@ -290,13 +288,13 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             break;
         }
         }
-        proc.waitFor()
-        Log.d(TAG, "RETCODE: " + retcode)
+        process.waitFor()
+        Log.d(TAG, "RETCODE: $retcode")
         return retcode
     }
 
     private fun rpcStartDaemon(args: JSONObject) {
-        authKind = deserializeRpcAuthKind(args.getJSONObject("auth_kind"))
+        authKind = fromJSON(args.getJSONObject("auth_kind"))
         mExitName = args.getString("exit_hostname")
         mListenAll = args.getBoolean("listen_all")
         mForceBridges = args.getBoolean("force_bridges")
@@ -467,17 +465,18 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         TunnelState.getTunnelState().tunnelManager.restartSocksProxyDaemon()
     }
 
-    protected fun startTunnelService(context: Context?) {
+    private fun startTunnelService(context: Context?) {
         Log.i(TAG, "starting tunnel service")
         val startTunnelVpn = Intent(context, TunnelVpnService::class.java)
         Log.d(TAG, "*** GONNA SET PREFERENCES ***  "+ (context == null).toString())
         val prefs = context!!.getSharedPreferences("daemon", Context.MODE_PRIVATE);
         Log.d(TAG, "*** REALLY GONNA SET PREFERENCES ***  ")
+
         with (prefs.edit()) {
             putString(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress)
             putString(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort)
             putString(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort)
-            putString(TunnelManager.AUTH_KIND, serializedAuthKind)
+            putString(TunnelManager.AUTH_KIND, toJSON(authKind).toString())
             putString(TunnelManager.EXIT_NAME, mExitName)
             Log.d(TAG, "*** mForceBridges *** "  + mForceBridges.toString())
             putBoolean(TunnelManager.FORCE_BRIDGES, mForceBridges!!)
@@ -552,21 +551,6 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             }
         }
     }
-    private fun deserializeRpcAuthKind(json: JSONObject): RpcAuthKind {
-        return when (json.getString("RpcAuthKind")) {
-            PASSWORD.toString() -> {
-                val username = json.getString("username")
-                val password = json.getString("password")
-                PASSWORD.apply {
-                    setUsername(username)
-                    setPassword(password)
-                }
-            }
-            SIGNATURE.toString() -> SIGNATURE
-            else -> throw IllegalArgumentException("Invalid RpcAuthKind type")
-        }
-    }
-
     companion object {
         const val ACTION_STOP_VPN_SERVICE = "stop_vpn_immediately"
         private const val PREFS = Constants.PREFS

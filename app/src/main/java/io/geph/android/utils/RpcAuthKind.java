@@ -1,5 +1,8 @@
 package io.geph.android.utils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,18 +40,6 @@ public enum RpcAuthKind {
         }
     };
 
-    @Override
-    public String toString() {
-        switch (this) {
-            case PASSWORD:
-                return "PASSWORD";
-            case SIGNATURE:
-                return "SIGNATURE";
-            default:
-                throw new IllegalArgumentException("Invalid RpcAuthKind type");
-        }
-    }
-
     String username;
     String password;
 
@@ -63,12 +54,33 @@ public enum RpcAuthKind {
     public List<String> getFlags() {
         switch (this) {
             case PASSWORD:
-                return Arrays.asList(new String[]{"--username", this.username, "--password", this.password});
+                return Arrays.asList("auth-password", "--username", this.username, "--password", this.password);
             case SIGNATURE:
-                return List.of();
+                // TODO: fix the flags here
+                return Arrays.asList("auth-signature");
             default:
                 throw new IllegalArgumentException("Invalid RpcAuthKind type");
         }
+    }
+
+    public static JSONObject toJSON(RpcAuthKind authKind) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        if (authKind == RpcAuthKind.PASSWORD) {
+            jsonObject.put(authKind.name(), authKind);
+        } else {
+            throw new JSONException("Unsupported RpcAuthKind type");
+        }
+
+        return jsonObject;
+    }
+
+    public static RpcAuthKind fromJSON(JSONObject json) {
+        if (json.has(PASSWORD.name())){
+            return PASSWORD;
+        }
+        // TODO: handle SIGNATURE type later
+        return null;
     }
 
     public abstract String getUsername();
