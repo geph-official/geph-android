@@ -1,10 +1,13 @@
 package io.geph.android.utils;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public enum RpcAuthKind {
     PASSWORD {
@@ -65,9 +68,12 @@ public enum RpcAuthKind {
 
     public static JSONObject toJSON(RpcAuthKind authKind) throws JSONException {
         JSONObject jsonObject = new JSONObject();
+        JSONObject inner = new JSONObject();
 
         if (authKind == RpcAuthKind.PASSWORD) {
-            jsonObject.put(authKind.name(), authKind);
+            inner.put("username", authKind.username);
+            inner.put("password", authKind.password);
+            jsonObject.put("Password", inner);
         } else {
             throw new JSONException("Unsupported RpcAuthKind type");
         }
@@ -75,9 +81,14 @@ public enum RpcAuthKind {
         return jsonObject;
     }
 
-    public static RpcAuthKind fromJSON(JSONObject json) {
-        if (json.has(PASSWORD.name())){
-            return PASSWORD;
+    public static RpcAuthKind fromJSON(JSONObject json) throws JSONException {
+        if (json.has("Password")) {
+            RpcAuthKind authKind = PASSWORD;
+            JSONObject inner = json.getJSONObject("Password");
+            authKind.setUsername(inner.getString("username"));
+            authKind.setPassword(inner.getString("password"));
+
+            return authKind;
         }
         // TODO: handle SIGNATURE type later
         return null;

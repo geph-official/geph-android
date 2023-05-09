@@ -53,7 +53,7 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
     private var mUiHandler: Handler? = null
     private var mWebView: WebView? = null
     private var vpnReceiver: Receiver? = null
-    private var authKind: RpcAuthKind? = null
+    private var mAuthKind: RpcAuthKind? = null
 
     private var mExitName: String? = null
     private var mExcludeAppsJson: String? = null
@@ -249,19 +249,17 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
         val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
         val authKind = fromJSON(args.getJSONObject(0))
-
         val commands: MutableList<String> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("sync")
         commands.add("--credential-cache")
         commands.add(dbPath)
-        if (args.getBoolean(2)) {
+        if (args.getBoolean(1)) {
             commands.add("--force")
         }
 
         val authFlags = authKind.flags
         commands.addAll(authFlags)
-
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
         var retcode: String
@@ -294,7 +292,7 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     private fun rpcStartDaemon(args: JSONObject) {
-        authKind = fromJSON(args.getJSONObject("auth_kind"))
+        mAuthKind = fromJSON(args.getJSONObject("auth"))
         mExitName = args.getString("exit_hostname")
         mListenAll = args.getBoolean("listen_all")
         mForceBridges = args.getBoolean("force_bridges")
@@ -476,7 +474,7 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
             putString(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress)
             putString(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort)
             putString(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort)
-            putString(TunnelManager.AUTH_KIND, toJSON(authKind).toString())
+            putString(TunnelManager.AUTH_KIND, toJSON(mAuthKind).toString())
             putString(TunnelManager.EXIT_NAME, mExitName)
             Log.d(TAG, "*** mForceBridges *** "  + mForceBridges.toString())
             putBoolean(TunnelManager.FORCE_BRIDGES, mForceBridges!!)

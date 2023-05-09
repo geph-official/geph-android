@@ -78,7 +78,6 @@ class TunnelManager(parentService: TunnelVpnService?) {
 
         val authKindJSON = JSONObject(prefs.getString(AUTH_KIND, "")!!)
         authKind = fromJSON(authKindJSON)
-
         mExitName = prefs.getString(EXIT_NAME, "")
         mForceBridges = prefs.getBoolean(FORCE_BRIDGES, false)
         mListenAll = prefs.getBoolean(LISTEN_ALL, false)
