@@ -41,8 +41,8 @@ window["NATIVE_GATE"] = {
       return false;
     }
   },
-  async sync_user_info(username, password) {
-    let sync_info = await callRpc("sync", [username, password, false]);
+  async sync_user_info(auth_kind) {
+    let sync_info = await callRpc("sync", [auth_kind, false]);
     if (sync_info.user.subscription)
       return {
         level: sync_info.user.subscription.level.toLowerCase(),
@@ -70,19 +70,17 @@ async binder_rpc(method, args) {
   }
   return resp.result;
 },
-  async sync_exits(username, password) {
-    let sync_info = await callRpc("sync", [username, password, false]);
+  async sync_exits(auth_kind) {
+    let sync_info = await callRpc("sync", [auth_kind, false]);
     return sync_info.exits;
   },
 
-    async purge_caches(username, password) {
-      await callRpc("sync", [username, password, true]);
-    },
-
+  async purge_caches(auth_kind) {
+    await callRpc("sync", [auth_kind, true]);
+  },
 
   supports_app_whitelist: true,
-    supports_listen_all: true,
-
+  supports_listen_all: true,
 
   async sync_app_list() {
     const result = await callRpc("get_app_list", []);
@@ -102,8 +100,7 @@ async binder_rpc(method, args) {
   async get_native_info() {
         return {
           platform_type: "android",
-          platform_details: "Android",
-          version: window.Android.jsVersion(),
+          platform_details: "Android", version: window.Android.jsVersion(),
         };
   }
 };

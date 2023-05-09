@@ -28,10 +28,13 @@ import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewAssetLoader.AssetsPathHandler
+import com.android.volley.BuildConfig
 import io.geph.android.proxbinder.Proxbinder
 import io.geph.android.tun2socks.TunnelManager
 import io.geph.android.tun2socks.TunnelState
 import io.geph.android.tun2socks.TunnelVpnService
+import io.geph.android.utils.RpcAuthKind
+import io.geph.android.utils.RpcAuthKind.*
 import org.apache.commons.text.StringEscapeUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -48,26 +51,16 @@ import kotlin.concurrent.thread
  * @author j3sawyer
  */
 class MainActivity : AppCompatActivity(), MainActivityInterface {
-    /**
-     *
-     */
-    var isShow = false
-    var scrollRange = -1
-    private val mInternetDown = false
-    private val mInternetDownSince: Long = 0
     private var mUiHandler: Handler? = null
-    private val mProgress: View? = null
     private var mWebView: WebView? = null
     private var vpnReceiver: Receiver? = null
-    private var mUsername: String? = null
-    private var mPassword: String? = null
+    private var authKind: RpcAuthKind? = null
+
     private var mExitName: String? = null
     private var mExcludeAppsJson: String? = null
-    private val mBypassChinese: Boolean? = null
     private var mForceProtocol: String? = null
     private var mListenAll: Boolean? = null
     private var mForceBridges: Boolean? = null
-    private var syncStatusJson: String? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun bindActivity() {
@@ -251,11 +244,13 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         return reader.readLine()
     }
 
-    fun rpcSync(args: JSONArray): String {
+    private fun rpcSync(args: JSONArray): String {
         Os.setenv("RUST_LOG", "error", true)
         val ctx = applicationContext;
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
         val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
+
+        val authKind= deserializeRpcAuthKind(args.getJSONObject(0))
         val commands: MutableList<String> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("sync")
@@ -265,10 +260,9 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             commands.add("--force")
         }
         commands.add("auth-password")
-        commands.add("--username")
-        commands.add(args.getString(0))
-        commands.add("--password")
-        commands.add(args.getString(1))
+        val authFlags = authKind.flags
+        commands.addAll(authFlags)
+
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
         val proc: Process
@@ -302,8 +296,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     private fun rpcStartDaemon(args: JSONObject) {
-        mUsername = args.getString("username")
-        mPassword = args.getString("password")
+        authKind = deserializeRpcAuthKind(args.getJSONObject("RpcAuthKind"))
         mExitName = args.getString("exit_hostname")
         mListenAll = args.getBoolean("listen_all")
         mForceBridges = args.getBoolean("force_bridges")
@@ -558,6 +551,20 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                     "broadcast networkStateReceiver vpn start success extra"
                 )
             }
+        }
+    }
+    private fun deserializeRpcAuthKind(json: JSONObject): RpcAuthKind {
+        return when (json.getString("RpcAuthKind")) {
+            PASSWORD.toString() -> {
+                val username = json.getString("username")
+                val password = json.getString("password")
+                PASSWORD.apply {
+                    setUsername(username)
+                    setPassword(password)
+                }
+            }
+            SIGNATURE.toString() -> SIGNATURE
+            else -> throw IllegalArgumentException("Invalid RpcAuthKind type")
         }
     }
 

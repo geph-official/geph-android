@@ -1,4 +1,4 @@
-package io.geph.android;
+package io.geph.android.utils;
 
 import android.content.Context;
 import android.os.Environment;
