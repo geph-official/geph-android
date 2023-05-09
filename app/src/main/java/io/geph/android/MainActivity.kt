@@ -296,7 +296,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
     private fun rpcStartDaemon(args: JSONObject) {
-        authKind = deserializeRpcAuthKind(args.getJSONObject("RpcAuthKind"))
+        authKind = deserializeRpcAuthKind(args.getJSONObject("auth_kind"))
         mExitName = args.getString("exit_hostname")
         mListenAll = args.getBoolean("listen_all")
         mForceBridges = args.getBoolean("force_bridges")
@@ -477,8 +477,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             putString(TunnelManager.SOCKS_SERVER_ADDRESS_BASE, mSocksServerAddress)
             putString(TunnelManager.SOCKS_SERVER_PORT_EXTRA, mSocksServerPort)
             putString(TunnelManager.DNS_SERVER_PORT_EXTRA, mDnsServerPort)
-            putString(TunnelManager.USERNAME, mUsername)
-            putString(TunnelManager.PASSWORD, mPassword)
+            putString(TunnelManager.AUTH_KIND, serializedAuthKind)
             putString(TunnelManager.EXIT_NAME, mExitName)
             Log.d(TAG, "*** mForceBridges *** "  + mForceBridges.toString())
             putBoolean(TunnelManager.FORCE_BRIDGES, mForceBridges!!)

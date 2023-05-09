@@ -48,6 +48,7 @@ public enum RpcAuthKind {
                 throw new IllegalArgumentException("Invalid RpcAuthKind type");
         }
     }
+
     String username;
     String password;
 

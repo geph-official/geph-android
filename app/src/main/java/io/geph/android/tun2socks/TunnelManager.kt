@@ -20,6 +20,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import io.geph.android.MainActivity
 import io.geph.android.R
+import io.geph.android.utils.RpcAuthKind
 import org.json.JSONArray
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -45,8 +46,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
     private var mSocksServerPort: String? = null
     private var mDnsServerPort: String? = null
     private var mDnsResolverAddress: String? = null
-    private var mUsername: String? = null
-    private var mPassword: String? = null
+    private var authKind: RpcAuthKind? = null
     private var mExitName: String? = null
     private var mListenAll: Boolean? = null
     private var mForceBridges: Boolean? = null
@@ -73,8 +73,9 @@ class TunnelManager(parentService: TunnelVpnService?) {
         mDnsServerPort = prefs.getString(DNS_SERVER_PORT_EXTRA, "")
         mDnsResolverAddress = "$mSocksServerAddressBase:$mDnsServerPort"
         Log.i(LOG_TAG, "onStartCommand parsed some stuff")
-        mUsername = prefs.getString(USERNAME, "")
-        mPassword = prefs.getString(PASSWORD, "")
+
+        // TODO deserialize into authkind type
+        authKind = prefs.getString(AUTH_KIND, null)
         mExitName = prefs.getString(EXIT_NAME, "")
         mForceBridges = prefs.getBoolean(FORCE_BRIDGES, false)
         mListenAll = prefs.getBoolean(LISTEN_ALL, false)
@@ -361,6 +362,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
         val SOCKS_SERVER_PORT_EXTRA = "socksServerPort"
         @JvmField
         val DNS_SERVER_PORT_EXTRA = "dnsServerPort"
+        @JvmField
+        val AUTH_KIND = "authKind"
         @JvmField
         val USERNAME = "username"
         @JvmField
