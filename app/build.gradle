@@ -13,8 +13,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 11026
-        versionName '4.8.1'
+        versionCode 11027
+        versionName '4.8.2'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -67,11 +67,18 @@ dependencies {
 
 }
 
+task preBuildScript(type: Exec) {
+    commandLine "bash", "PREBUILD.sh"
+    workingDir rootProject.projectDir
+}
+
 task copyGephBinaries(type: Copy) {
     description = 'Copying geph binaries from the prebuild directory'
     from '../prebuild/'
     into 'src/main/jniLibs'
 }
+
+preBuild.dependsOn preBuildScript
 
 afterEvaluate {
     android.applicationVariants.all { variant ->
