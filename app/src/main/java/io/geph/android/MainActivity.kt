@@ -160,7 +160,7 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
     }
 
 
-    fun callRpcInner(verb: String?, jsonArgs: String?): String {
+    private fun callRpcInner(verb: String?, jsonArgs: String?): String {
         val args = JSONArray(jsonArgs)
         Log.e(TAG, verb!!)
         when (verb) {
@@ -225,7 +225,11 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
         return "{}"
     }
 
-    fun rpcBinder(args: JSONArray): String {
+    private fun storeSecret(secret: String, path: File) {
+        path.writeText(secret)
+    }
+
+    private fun rpcBinder(args: JSONArray): String {
         val rawJsonString = args.getString(0);
         Log.d("rpcBinder", rawJsonString);
         val ctx = applicationContext;
@@ -236,9 +240,9 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
         commands.add("binder-proxy")
         val pb = ProcessBuilder(commands)
         val proc = pb.start()
-        proc.outputStream.write(rawJsonString.toByteArray());
-        proc.outputStream.write("\n".toByteArray());
-        proc.outputStream.flush();
+        proc.outputStream.write(rawJsonString.toByteArray())
+        proc.outputStream.write("\n".toByteArray())
+        proc.outputStream.flush()
         val reader = BufferedReader(InputStreamReader(proc.inputStream))
         return reader.readLine()
     }
@@ -248,7 +252,6 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
         val ctx = applicationContext;
         val dbPath = ctx.applicationInfo.dataDir + "/geph4-credentials-ng"
         val daemonBinaryPath = ctx.applicationInfo.nativeLibraryDir + "/libgeph.so"
-        val authKind = fromJSON(args.getJSONObject(0))
         val commands: MutableList<String> = ArrayList()
         commands.add(daemonBinaryPath)
         commands.add("sync")
@@ -257,7 +260,11 @@ open class MainActivity : AppCompatActivity(), MainActivityInterface {
         if (args.getBoolean(1)) {
             commands.add("--force")
         }
-
+        val authKind = fromJSON(args.getJSONObject(0))
+        authKind.setContext(this)
+        if (authKind.isSignature) {
+            storeSecret(authKind.secret, authKind.secretPath)
+        }
         val authFlags = authKind.flags
         commands.addAll(authFlags)
         val pb = ProcessBuilder(commands)

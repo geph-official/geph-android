@@ -1,16 +1,16 @@
 package io.geph.android.utils;
 
-import android.util.Log;
+import android.content.Context;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 public enum RpcAuthKind {
-    PASSWORD {
+    PASSWORD() {
         @Override
         public String getUsername() {
             return username;
@@ -25,6 +25,12 @@ public enum RpcAuthKind {
         public String getSecret() {
             throw new UnsupportedOperationException("Cannot get secret for Password rpc authKind");
         }
+
+        @Override
+        public boolean isPassword() { return true; }
+
+        @Override
+        public boolean isSignature() { return false; }
     },
     SIGNATURE {
         @Override
@@ -41,14 +47,30 @@ public enum RpcAuthKind {
         public String getSecret() {
             return secret;
         }
+
+        @Override
+        public boolean isPassword() { return false; }
+
+        @Override
+        public boolean isSignature() { return true; }
     };
 
-    public static final String SK_PATH = "geph-key";
+    private Context context;
 
     String username;
     String password;
 
     String secret;
+
+   public void setContext(Context context) {
+       this.context = context;
+   }
+
+    public File getSecretPath() {
+        File file = new File(context.getCacheDir(), "secret");
+
+        return file;
+    }
 
     public void setUsername(String username) {
         this.username = username;
@@ -65,7 +87,7 @@ public enum RpcAuthKind {
             case PASSWORD:
                 return Arrays.asList("auth-password", "--username", this.username, "--password", this.password);
             case SIGNATURE:
-                return Arrays.asList("auth-keypair", "--sk-path", SK_PATH);
+                return Arrays.asList("auth-keypair", "--sk-path", getSecretPath().toString());
             default:
                 throw new IllegalArgumentException("Invalid RpcAuthKind type");
         }
@@ -111,5 +133,7 @@ public enum RpcAuthKind {
     public abstract String getUsername();
     public abstract String getPassword();
     public abstract String getSecret();
+    public abstract boolean isPassword();
+    public abstract boolean isSignature();
 }
 
