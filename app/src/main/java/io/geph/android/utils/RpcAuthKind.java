@@ -22,29 +22,33 @@ public enum RpcAuthKind {
         }
 
         @Override
-        public boolean hasCredentials() {
-            return true;
+        public String getSecret() {
+            throw new UnsupportedOperationException("Cannot get secret for Password rpc authKind");
         }
     },
     SIGNATURE {
         @Override
         public String getUsername() {
-            throw new UnsupportedOperationException("Not supported for this RpcAuthKind.");
+            throw new UnsupportedOperationException("Cannot get username for Signature rpc authKind");
         }
 
         @Override
         public String getPassword() {
-            throw new UnsupportedOperationException("Not supported for this RpcAuthKind.");
+            throw new UnsupportedOperationException("Cannot get password for Signature rpc authKind");
         }
 
         @Override
-        public boolean hasCredentials() {
-            return false;
+        public String getSecret() {
+            return secret;
         }
     };
 
+    public static final String SK_PATH = "geph-key";
+
     String username;
     String password;
+
+    String secret;
 
     public void setUsername(String username) {
         this.username = username;
@@ -54,13 +58,14 @@ public enum RpcAuthKind {
         this.password = password;
     }
 
+    public void setSecret(String secret) { this.secret = secret; }
+
     public List<String> getFlags() {
         switch (this) {
             case PASSWORD:
                 return Arrays.asList("auth-password", "--username", this.username, "--password", this.password);
             case SIGNATURE:
-                // TODO: fix the flags here
-                return Arrays.asList("auth-signature");
+                return Arrays.asList("auth-keypair", "--sk-path", SK_PATH);
             default:
                 throw new IllegalArgumentException("Invalid RpcAuthKind type");
         }
@@ -74,6 +79,9 @@ public enum RpcAuthKind {
             inner.put("username", authKind.username);
             inner.put("password", authKind.password);
             jsonObject.put("Password", inner);
+        } else if (authKind == RpcAuthKind.SIGNATURE) {
+            inner.put("secret", authKind.secret);
+            jsonObject.put("Signature", inner);
         } else {
             throw new JSONException("Unsupported RpcAuthKind type");
         }
@@ -89,13 +97,19 @@ public enum RpcAuthKind {
             authKind.setPassword(inner.getString("password"));
 
             return authKind;
+        } else if (json.has("Signature")) {
+            RpcAuthKind authKind = SIGNATURE;
+            JSONObject inner = json.getJSONObject("Signature");
+            authKind.setSecret(inner.getString("sk"));
+
+            return authKind;
+        } else {
+            throw new JSONException("Unsupported RpcAuthKind type");
         }
-        // TODO: handle SIGNATURE type later
-        return null;
     }
 
     public abstract String getUsername();
     public abstract String getPassword();
-    public abstract boolean hasCredentials();
+    public abstract String getSecret();
 }
 
