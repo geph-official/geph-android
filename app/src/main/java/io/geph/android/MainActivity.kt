@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
                         cback + "[0](\"" + StringEscapeUtils.escapeEcmaScript(result) + "\")",
                         null
                     );
-                };
+                }
             } catch (e: Exception) {
                 Log.d(TAG, "error is back " + e.toString());
                 runOnUiThread {
