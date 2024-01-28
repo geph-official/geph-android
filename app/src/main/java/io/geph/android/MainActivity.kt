@@ -43,10 +43,20 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
+// google analytics
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 /**
  * @author j3sawyer
  */
+
+private lateinit var firebaseAnalytics: FirebaseAnalytics
 class MainActivity : AppCompatActivity(), MainActivityInterface {
     /**
      *
@@ -67,7 +77,6 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
     private var mForceProtocol: String? = null
     private var mListenAll: Boolean? = null
     private var mForceBridges: Boolean? = null
-    private var syncStatusJson: String? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun bindActivity() {
@@ -272,7 +281,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val pb = ProcessBuilder(commands)
         Log.d(TAG, "START CHECK")
         val proc: Process
-        var retcode: String
+        var retval: String
         proc = pb.start()
         val reader = BufferedReader(InputStreamReader(proc.inputStream))
         val builder = StringBuilder()
@@ -283,7 +292,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
             builder.append(System.getProperty("line.separator"))
         }
         Log.d(TAG, "DONE")
-        retcode = builder.toString()
+        retval = builder.toString()
         val lines = BufferedReader(InputStreamReader(proc.errorStream));
         while (true) {
         val stderr = lines.readLine();
@@ -297,9 +306,36 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         }
         }
         proc.waitFor()
-        Log.d(TAG, "RETCODE: " + retcode)
-        return retcode
+        logChangeUserLevel(retval)
+        Log.d(TAG, "RETCODE: " + retval)
+        return retval
     }
+
+    fun logChangeUserLevel(syncRes: String) {
+        val syncJson = deserializeJson(syncRes)
+        val userJson = syncJson["user"]?.jsonObject
+        val level = if (userJson?.get("subscription") == JsonNull) "Free" else "Plus"
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        Log.d(TAG, "User Level: $level")
+        if (level == "Plus") {
+            if (sharedPref.getString("lastSyncUserLevel", "") == "Free") {
+                // Log event with Google Analytics
+                firebaseAnalytics.logEvent("buyPlus", null)
+                Log.d(TAG, "LOOOOGGGGED PURCHASE IN FB!")
+            }
+        }
+        sharedPref.edit().putString("lastSyncUserLevel", level).apply();
+    }
+
+    fun deserializeJson(jsonString: String): JsonObject {
+        val jsonElement = Json.parseToJsonElement(jsonString)
+        if (jsonElement is JsonObject) {
+            return jsonElement
+        } else {
+            throw IllegalArgumentException("The provided string is not a JSON object.")
+        }
+    }
+
 
     private fun rpcStartDaemon(args: JSONObject) {
         mUsername = args.getString("username")
@@ -356,6 +392,8 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindActivity()
+        // Obtain the FirebaseAnalytics instance.
+        firebaseAnalytics = Firebase.analytics
 
         val filter = IntentFilter()
         filter.addAction(TunnelVpnService.TUNNEL_VPN_DISCONNECT_BROADCAST)

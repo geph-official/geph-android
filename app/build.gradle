@@ -1,12 +1,15 @@
-apply plugin: 'com.android.application'
+plugins {
+    id("com.android.application")
+    id("com.google.gms.google-services")
+    id("kotlinx-serialization")
+}
 
 android {
     ndkVersion "19.2.5345600"
-    lintOptions {
-        checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in b release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     compileSdkVersion 33
     defaultConfig {
@@ -47,6 +50,13 @@ android {
     productFlavors {
     }
     namespace 'io.geph.android'
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
@@ -64,7 +74,9 @@ dependencies {
     implementation files('jna-5.9.0.aar')
     implementation 'org.apache.commons:commons-text:1.9'
     implementation "androidx.webkit:webkit:1.5.0"
-
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    implementation "com.google.firebase:firebase-analytics"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 }
 
 task preBuildScript(type: Exec) {
@@ -78,6 +90,7 @@ task copyGephBinaries(type: Copy) {
     into 'src/main/jniLibs'
 }
 
+preBuild.dependsOn copyGephBinaries
 preBuild.dependsOn preBuildScript
 
 afterEvaluate {
@@ -87,4 +100,4 @@ afterEvaluate {
 }
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+

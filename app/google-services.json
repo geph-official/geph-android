@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203643111221",
+    "project_id": "geph-android",
+    "storage_bucket": "geph-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203643111221:android:f8e7f23b00b66f2b2b6e7c",
+        "android_client_info": {
+          "package_name": "io.geph.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7ZvHeS-Gikmw58XarHdZqCujYD3NmwRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
