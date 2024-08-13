@@ -1,5 +1,5 @@
-#!/bin/bash
 
+#!/bin/bash
 
 export PREFIX="https://f001.backblazeb2.com/file/geph-dl/geph4-binaries/v$(cat app/build.gradle | grep versionName | awk '{print $2}' | tr -d \')"
 
@@ -18,19 +18,19 @@ mkdir -p $X86_DIR
 mkdir -p $ARM64_DIR
 mkdir -p $X86_64_DIR
 
-# Function to download the file only if local and remote file sizes differ or the local file doesn't exist
+# Function to download the file only if local and remote file last modified dates differ or the local file doesn't exist
 download_if_needed() {
   remote_url="$1"
   local_file="$2"
   if [ -e "$local_file" ]; then
-    local_size=$(stat -c%s "$local_file")
-    remote_size=$(curl -sI "$remote_url" | grep Content-Length | awk '{print $2}' | tr -d '\r')
-    if [ "$local_size" = "$remote_size" ]; then
+    local_date=$(date -r "$local_file" +%s)
+    remote_date=$(curl -sI "$remote_url" | grep -i last-modified | sed 's/Last-Modified: //i' | date -f - +%s)
+    if [ "$local_date" = "$remote_date" ]; then
       echo "File $local_file is up to date, skipping download."
       return 0
     fi
   fi
-  curl "$remote_url" > "$local_file"
+  curl -R "$remote_url" > "$local_file"
 }
 
 download_if_needed "$PREFIX/geph4-client-android-armv7" $ARM_DIR/$TARGET

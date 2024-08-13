@@ -16,8 +16,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 11045
-        versionName '4.11.0'
+        versionCode 11046
+        versionName '4.99.0-actuallyfive.2'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -91,7 +91,7 @@ task copyGephBinaries(type: Copy) {
 }
 
 preBuild.dependsOn copyGephBinaries
-preBuild.dependsOn preBuildScript
+copyGephBinaries.dependsOn preBuildScript
 
 afterEvaluate {
     android.applicationVariants.all { variant ->
