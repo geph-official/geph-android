@@ -121,7 +121,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
         return ""
     }
 
-    private fun setupAndRunDaemon(): Process { // Run Geph-Go with uProxy style fail-safe
+    private fun setupAndRunDaemon(): Process {
         Log.e("SETUP", "setupAndRunDaemon");
         // INITIALIZE FILE DESCRIPTOR
         var newFd: ParcelFileDescriptor? = null
@@ -137,7 +137,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
                 builder.setMetered(false)
             }
             newFd = builder.setBlocking(true)
-                    .setMtu(1280)
+                    .setMtu(16384)
                     .establish()
         }
         tunFd = newFd;
