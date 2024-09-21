@@ -366,7 +366,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
         val bigArray = JSONArray()
         for (packageInfo in packages) {
-            if (packageInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0 || packageInfo.packageName == applicationContext.packageName) {
+            if (packageInfo.packageName == applicationContext.packageName) {
                 continue
             }
             val jsonObject = JSONObject()

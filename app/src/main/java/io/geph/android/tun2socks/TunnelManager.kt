@@ -239,7 +239,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
             val input = FileInputStream(tunFd.fileDescriptor);
             // download
             Thread {
-                val body = ByteArray(2048);
+                val body = ByteArray(65536);
                 while(true) {
                     val bodylen1 = childStdout.read();
                     val bodylen2 = childStdout.read();
@@ -253,7 +253,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
             }.start();
             // upload
             Thread {
-                val body = ByteArray(2048);
+                val body = ByteArray(65536);
                 while(true) {
                     val n = input.read(body, 2, 2046);
                     body[0] = (n % 256).toByte();
