@@ -11,13 +11,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    compileSdkVersion 33
+    compileSdkVersion 34
     defaultConfig {
         applicationId 'io.geph.android'
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 11059
-        versionName '4.99.8'
+        targetSdkVersion 34
+        versionCode 11061
+        versionName '4.99.11'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
