@@ -4,6 +4,8 @@ plugins {
     id("kotlinx-serialization")
 }
 
+
+
 android {
     ndkVersion "19.2.5345600"
 
@@ -16,8 +18,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 11069
-        versionName '4.99.20'
+        versionCode 11075
+        versionName '4.99.26'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
