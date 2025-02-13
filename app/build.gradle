@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")
+//    id("com.google.gms.google-services")
     id("kotlinx-serialization")
 }
 
@@ -18,8 +18,8 @@ android {
         applicationId 'io.geph.android'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 11081
-        versionName '4.99.30'
+        versionCode 11082
+        versionName '4.99.32'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'

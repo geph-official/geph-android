@@ -44,9 +44,9 @@ import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
 // google analytics
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
+//import com.google.firebase.analytics.FirebaseAnalytics
+//import com.google.firebase.analytics.ktx.analytics
+//import com.google.firebase.ktx.Firebase
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
@@ -56,7 +56,8 @@ import kotlinx.serialization.json.jsonObject
  * @author j3sawyer
  */
 
-private lateinit var firebaseAnalytics: FirebaseAnalytics
+//private lateinit var firebaseAnalytics: FirebaseAnalytics
+
 class MainActivity : AppCompatActivity(), MainActivityInterface {
     /**
      *
@@ -317,13 +318,13 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         val level = if (userJson?.get("subscription") == JsonNull) "Free" else "Plus"
         val sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         Log.d(TAG, "User Level: $level")
-        if (level == "Plus") {
-            if (sharedPref.getString("lastSyncUserLevel", "") == "Free") {
-                // Log event with Google Analytics
-                firebaseAnalytics.logEvent("buyPlus", null)
-                Log.d(TAG, "LOOOOGGGGED PURCHASE IN FB!")
-            }
-        }
+//        if (level == "Plus") {
+//            if (sharedPref.getString("lastSyncUserLevel", "") == "Free") {
+//                // Log event with Google Analytics
+//                firebaseAnalytics.logEvent("buyPlus", null)
+//                Log.d(TAG, "LOOOOGGGGED PURCHASE IN FB!")
+//            }
+//        }
         sharedPref.edit().putString("lastSyncUserLevel", level).apply();
     }
 
@@ -393,7 +394,7 @@ class MainActivity : AppCompatActivity(), MainActivityInterface {
         setContentView(R.layout.activity_main)
         bindActivity()
         // Obtain the FirebaseAnalytics instance.
-        firebaseAnalytics = Firebase.analytics
+//        firebaseAnalytics = Firebase.analytics
 
         val filter = IntentFilter()
         filter.addAction(TunnelVpnService.TUNNEL_VPN_DISCONNECT_BROADCAST)

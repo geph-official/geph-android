@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 11081,
-      "versionName": "4.99.30",
+      "versionCode": 11082,
+      "versionName": "4.99.31-alpha.1",
       "outputFile": "app-releasePlay.apk"
     }
   ],
