@@ -56,9 +56,6 @@ data class DaemonArgs(
             if (listenAll) {
                 put("socks5_listen", "0.0.0.0:9909")
                 put("http_proxy_listen", "0.0.0.0:9910")
-            } else {
-                put("socks5_listen", "127.0.0.1:9909")
-                put("http_proxy_listen", "127.0.0.1:9910")
             }
 
             put("sess_metadata", metadata)

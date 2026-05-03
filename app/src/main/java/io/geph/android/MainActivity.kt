@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View.OVER_SCROLL_NEVER
 import android.webkit.*
 import android.widget.Toast
@@ -49,6 +50,8 @@ class MainActivity : AppCompatActivity() {
 
     // Current daemon configuration
     private var daemonArgs: DaemonArgs? = null
+
+    private val accountEventSink by lazy { createAccountEventSink(applicationContext) }
 
 
     // -------------------------------------------------------------------
@@ -155,7 +158,7 @@ class MainActivity : AppCompatActivity() {
     // -------------------------------------------------------------------
     // WebView initialization
     // -------------------------------------------------------------------
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
     private fun bindActivity() {
         mWebView = findViewById(R.id.main_webview)
         val wview = mWebView!!
@@ -163,6 +166,12 @@ class MainActivity : AppCompatActivity() {
         wview.settings.domStorageEnabled = true
         wview.settings.javaScriptCanOpenWindowsAutomatically = true
         wview.settings.setSupportMultipleWindows(false)
+        wview.settings.setSupportZoom(false)
+        wview.settings.builtInZoomControls = false
+        wview.settings.displayZoomControls = false
+        wview.setOnTouchListener { _, event ->
+            event.actionMasked == MotionEvent.ACTION_POINTER_DOWN || event.pointerCount > 1
+        }
         wview.overScrollMode = OVER_SCROLL_NEVER
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         wview.webChromeClient = WebChromeClient()
@@ -308,7 +317,7 @@ class MainActivity : AppCompatActivity() {
                     out.println(command)
                     input.readLine() // read one-line response
                 };
-                return try {
+                val response = try {
                     Socket("127.0.0.1", 10000).use(ex)
                 } catch (e: Exception) {
                     Log.w(TAG, "daemon_rpc socket failed, falling back to stdio", e)
@@ -318,6 +327,8 @@ class MainActivity : AppCompatActivity() {
                         "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":\"\"}"
                     }
                 }
+                observeAccountStatusResponse(command, response)
+                return response
             }
             "get_app_list" -> {
                 return rpcGetAppList()
@@ -347,6 +358,50 @@ class MainActivity : AppCompatActivity() {
             }
         }
         throw Exception("Unknown RPC verb: $verb")
+    }
+
+    private fun observeAccountStatusResponse(command: String, response: String) {
+        runCatching {
+            val request = JSONObject(command)
+            if (request.optString("method") != "broker_rpc") {
+                return
+            }
+
+            val params = request.optJSONArray("params") ?: return
+            if (params.optString(0) != "get_user_info_by_cred") {
+                return
+            }
+
+            val userInfo = JSONObject(response).optJSONObject("result") ?: return
+            recordAccountLevel(userInfo)
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to observe account status response", error)
+        }
+    }
+
+    private fun recordAccountLevel(userInfo: JSONObject) {
+        val userId =
+                if (userInfo.has("user_id") && !userInfo.isNull("user_id")) {
+                    userInfo.optLong("user_id").toString()
+                } else {
+                    "unknown"
+                }
+        val plusExpiresUnix =
+                if (userInfo.has("plus_expires_unix") && !userInfo.isNull("plus_expires_unix")) {
+                    userInfo.optLong("plus_expires_unix", 0L)
+                } else {
+                    0L
+                }
+        val level = if (plusExpiresUnix > 0L) "Plus" else "Free"
+        val prefs = applicationContext.getSharedPreferences("account-level-events", MODE_PRIVATE)
+        val key = "last-level:$userId"
+        val previousLevel = prefs.getString(key, null)
+
+        if (previousLevel == "Free" && level == "Plus") {
+            accountEventSink.onPlusTransition()
+        }
+
+        prefs.edit().putString(key, level).apply()
     }
 
     // -------------------------------------------------------------------

@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-//    id("com.google.gms.google-services")
     id("kotlinx-serialization")
 }
 
@@ -25,8 +24,8 @@ android {
         applicationId 'io.geph.android'
         minSdk 21
         targetSdk 35
-        versionCode 11220
-        versionName '5.6.0'
+        versionCode 11221
+        versionName '5.7.0-rc.1'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -85,11 +84,11 @@ dependencies {
     implementation files('jna-5.9.0.aar')
     implementation 'org.apache.commons:commons-text:1.15.0'
     implementation "androidx.webkit:webkit:1.12.1"
-    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
-    implementation "com.google.firebase:firebase-analytics"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
     implementation 'androidx.browser:browser:1.8.0'
     implementation 'com.frybits.harmony:harmony:1.1.6'
+    releasePlayImplementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    releasePlayImplementation "com.google.firebase:firebase-analytics"
 }
 
 task preBuildScript(type: Exec) {
