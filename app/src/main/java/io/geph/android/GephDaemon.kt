@@ -5,25 +5,33 @@ import android.os.Build
 import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.Closeable
 import java.io.File
 
 /**
  * A daemon class that uses a [JsonObject] as its configuration.
  * The constructor immediately writes the config to disk and starts the daemon process.
+ *
+ * The daemon process is spawned with one of two stdio configurations:
+ *  - API 26+: stdin is set to ProcessBuilder.Redirect.INHERIT so the parent's
+ *    fd 0 (which can be dup2'd to a TUN fd by the caller) is visible to the
+ *    child. This is how the VPN packets are exchanged.
+ *  - API <26: ProcessBuilder.Redirect was added in API 26, so we cannot make
+ *    the child inherit our fd 0. Instead the child is spawned with --stdio-vpn,
+ *    which has it speak length-framed VPN packets on its own stdio (which the
+ *    caller pumps through Java I/O).
+ *
+ * Control RPC is always served by the daemon over a Unix-domain socket (set
+ * via the `control_listen_unix` field in the config). Callers connect via
+ * `android.net.LocalSocket`. There is no longer a stdio-RPC mode.
  */
-
 class GephDaemon(
-    private val context: Context,
-    private val config: JsonObject,
-    private val rpc: Boolean,
+    context: Context,
+    config: JsonObject,
 ) {
     companion object {
         // Matches common ANSI CSI/OSC escape sequences so relayed logs stay readable.
         private val ANSI_ESCAPE_REGEX =
-            Regex("""\u001B(?:\[[0-?]*[ -/]*[@-~]|\][^\u0007]*(?:\u0007|\u001B\\))""")
+            Regex("""(?:\[[0-?]*[ -/]*[@-~]|\][^]*(?:|\\))""")
 
         private fun configureNoColor(processBuilder: ProcessBuilder): ProcessBuilder {
             processBuilder.environment().apply {
@@ -40,73 +48,35 @@ class GephDaemon(
 
     private val configFile: File
     private val daemonProcess: Process
-    private var inputReader: BufferedReader? = null
-    private var outputWriter: BufferedWriter? = null
-
-    // Thread to read from stderr
     private var errorReaderThread: Thread? = null
 
     init {
-        // 1) Convert the dynamic JSON object to a string
         val configString = Json.encodeToString(JsonObject.serializer(), config)
         Log.d("GephDaemon", "starting with $config")
-        // 2) Write the config to the app's private files directory
         configFile = File.createTempFile("geph_config_", ".json", context.cacheDir).apply {
             deleteOnExit()
         }
         configFile.writeText(configString)
 
-        // 3) Prepare the process command
-        val command = if (rpc) {
-            listOf(
-                context.applicationInfo.nativeLibraryDir + "/libgeph.so",
-                "--config",
-                configFile.absolutePath,
-                "--stdio-rpc"
-            )
-        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            listOf(
-                context.applicationInfo.nativeLibraryDir + "/libgeph.so",
-                "--config",
-                configFile.absolutePath,
-                "--stdio-vpn"
-            )
-        } else {
-            listOf(
-                context.applicationInfo.nativeLibraryDir + "/libgeph.so",
-                "--config",
-                configFile.absolutePath,
-            )
+        val command = mutableListOf(
+            context.applicationInfo.nativeLibraryDir + "/libgeph.so",
+            "--config",
+            configFile.absolutePath,
+        )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            command.add("--stdio-vpn")
         }
 
-        // 4) Spawn the daemon process
         daemonProcess = try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                configureNoColor(ProcessBuilder(command))
-                    .start()
-            } else {
-                configureNoColor(ProcessBuilder(command))
-                    .redirectInput(
-                        if (rpc) {
-                            ProcessBuilder.Redirect.PIPE
-                        } else {
-                            ProcessBuilder.Redirect.INHERIT
-                        }
-                    )
-                    .start()
+            val builder = configureNoColor(ProcessBuilder(command))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.redirectInput(ProcessBuilder.Redirect.INHERIT)
             }
+            builder.start()
         } catch (e: Exception) {
             throw RuntimeException("Failed to start Geph daemon process", e)
         }
 
-        // 5) Set up readers/writers for stdin/stdout
-
-        if (rpc) {
-            inputReader = daemonProcess.inputStream.bufferedReader()
-            outputWriter = daemonProcess.outputStream.bufferedWriter()
-        }
-
-        // 6) Set up a separate thread to continuously read stderr and log it
         errorReaderThread = Thread {
             daemonProcess.errorStream.bufferedReader().use { errorReader ->
                 try {
@@ -114,35 +84,11 @@ class GephDaemon(
                     while (errorReader.readLine().also { line = it } != null) {
                         Log.d("GephDaemon", stripAnsi(line!!))
                     }
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     Log.d("GephDaemon", "exited with $e")
                 }
             }
         }.apply { start() }
-
-    }
-
-    /**
-     * Send a single line to the daemon's stdin and read exactly one line from its stdout.
-     *
-     * @param line The line/string to send to the daemon.
-     * @return The line read back from stdout, or `null` if the stream is closed.
-     */
-    @Synchronized
-    fun rawStdioRpc(line: String): String? {
-        return try {
-            val writer = outputWriter ?: return null
-            writer.write(line)
-            writer.newLine()
-            writer.flush()
-            Log.d("stdio", line)
-
-            // Read a single line from the daemon's stdout
-            inputReader?.readLine()
-        } catch (e: Exception) {
-            Log.w("GephDaemon", "stdio rpc failed", e)
-            null
-        }
     }
 
     fun uploadVpn(arr: ByteArray, len: Int) {
@@ -183,20 +129,7 @@ class GephDaemon(
 
     fun waitForExit(): Int = daemonProcess.waitFor()
 
-    private fun closeQuietly(closeable: Closeable?) {
-        try {
-            closeable?.close()
-        } catch (_: Exception) {
-        }
-    }
-
-    /**
-     * Stops the daemon by destroying the underlying process.
-     * Optionally interrupt/cleanup the stderr-reading thread if desired.
-     */
     fun stopDaemon() {
-        closeQuietly(inputReader)
-        closeQuietly(outputWriter)
         daemonProcess.destroyForcibly()
         errorReaderThread?.interrupt()
         configFile.delete()

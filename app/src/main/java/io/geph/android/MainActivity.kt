@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.net.LocalSocket
+import android.net.LocalSocketAddress
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -31,9 +33,9 @@ import io.geph.android.tun2socks.TunnelState
 import io.geph.android.tun2socks.TunnelVpnService
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
-import java.net.Socket
 import kotlinx.serialization.json.*
 import org.apache.commons.text.StringEscapeUtils
 import org.json.JSONArray
@@ -55,13 +57,9 @@ class MainActivity : AppCompatActivity() {
 
 
     // -------------------------------------------------------------------
-    // The fallback daemon, used ONLY for "daemon_rpc" if 127.0.0.1:10000 fails
+    // The fallback daemon, used ONLY for "daemon_rpc" when the VPN daemon's
+    // control Unix socket isn't reachable (e.g. the VPN service isn't running).
     // -------------------------------------------------------------------
-    /**
-     * This daemon is used **only** for fallback when "daemon_rpc" fails to connect to
-     * 127.0.0.1:10000. It's a read-only lazy property, so it's only created once you actually
-     * access it.
-     */
     private var fallbackDaemon: GephDaemon? = null
 
     private val prepareVpnLauncher = registerForActivityResult(StartActivityForResult()) { result ->
@@ -311,16 +309,10 @@ class MainActivity : AppCompatActivity() {
             "daemon_rpc" -> {
                 val command = args.getString(0)
                 Log.d(TAG, "daemon rpc: ${command}")
-                val ex = { socket: Socket ->
-                    val out = PrintWriter(socket.getOutputStream(), true)
-                    val input = BufferedReader(InputStreamReader(socket.getInputStream()))
-                    out.println(command)
-                    input.readLine() // read one-line response
-                };
                 val response = try {
-                    Socket("127.0.0.1", 10000).use(ex)
+                    localSocketRpc(TunnelManager.vpnControlSockPath(applicationContext), command)
                 } catch (e: Exception) {
-                    Log.w(TAG, "daemon_rpc socket failed, falling back to stdio", e)
+                    Log.w(TAG, "daemon_rpc unix socket failed, falling back", e)
                     if (!command.contains("\"method\":\"stop\"")) {
                         fallbackDaemonRpc(command)
                     } else {
@@ -346,14 +338,10 @@ class MainActivity : AppCompatActivity() {
             "open_browser" -> {
                 Log.d(TAG, "open browser")
                 val url = args.getString(0)
-                val builder = CustomTabsIntent.Builder()
-
-                // (Optional) customize toolbar color
-                //                builder.setToolbarColor(ContextCompat.getColor(this,
-                // R.color.your_color))
-
-                val customTabsIntent = builder.build()
-                customTabsIntent.launchUrl(this, Uri.parse(url))
+                runOnUiThread {
+                    val customTabsIntent = CustomTabsIntent.Builder().build()
+                    customTabsIntent.launchUrl(this, Uri.parse(url))
+                }
                 return "null"
             }
         }
@@ -425,6 +413,13 @@ class MainActivity : AppCompatActivity() {
             // Start the VPN service
             startVpn()
 
+            // Block until daemon is reachable on its control socket (mirrors desktop wait_daemon_start)
+            val socketPath = TunnelManager.vpnControlSockPath(applicationContext)
+            if (!waitForLocalSocket(socketPath, 30_000)) {
+                throw Exception("daemon did not become reachable within 30 seconds")
+            }
+            Thread.sleep(500)
+            return
 
         } catch (e: Exception) {
             Log.e(TAG, "Error starting daemon: ${e.message}", e)
@@ -580,33 +575,88 @@ class MainActivity : AppCompatActivity() {
         }
         current?.stopDaemon()
         fallbackDaemon = null
-        return run {
-            val fallbackConfig = buildJsonObject {
-                for ((key, value) in configTemplate()) {
-                    put(key, value)
-                }
-                put("cache", applicationContext.filesDir.resolve("cache_fallback").absolutePath)
+
+        val fallbackConfig = buildJsonObject {
+            for ((key, value) in configTemplate()) {
+                put(key, value)
             }
-            GephDaemon(applicationContext, fallbackConfig, true).also {
-                Log.d(TAG, "STARTING FALLBACK DAEMON")
-                fallbackDaemon = it
-            }
+            put("cache", applicationContext.filesDir.resolve("cache_fallback").absolutePath)
+            put("control_listen_unix", TunnelManager.fallbackControlSockPath(applicationContext))
+        }
+        return GephDaemon(applicationContext, fallbackConfig).also {
+            Log.d(TAG, "STARTING FALLBACK DAEMON")
+            fallbackDaemon = it
         }
     }
 
     @Synchronized
     private fun fallbackDaemonRpc(command: String): String {
-        val firstTry = ensureFallbackDaemon().rawStdioRpc(command)
-        if (firstTry != null) {
-            return firstTry
+        val socketPath = TunnelManager.fallbackControlSockPath(applicationContext)
+
+        ensureFallbackDaemon()
+        if (waitForLocalSocket(socketPath, 5_000)) {
+            try {
+                return localSocketRpc(socketPath, command)
+            } catch (e: Exception) {
+                Log.w(TAG, "fallback rpc failed, restarting daemon", e)
+            }
+        } else {
+            Log.w(TAG, "fallback daemon did not bind socket in time, restarting")
         }
 
-        Log.w(TAG, "fallback stdio rpc died, restarting daemon")
         fallbackDaemon?.stopDaemon()
         fallbackDaemon = null
+        ensureFallbackDaemon()
+        if (!waitForLocalSocket(socketPath, 5_000)) {
+            throw IllegalStateException("fallback daemon did not become reachable")
+        }
+        return localSocketRpc(socketPath, command)
+    }
 
-        return ensureFallbackDaemon().rawStdioRpc(command)
-                ?: throw IllegalStateException("fallback stdio rpc stream closed")
+    /**
+     * Connect to a daemon's control RPC Unix socket, send one line-delimited
+     * JSON-RPC request, and read back the one-line response.
+     */
+    private fun localSocketRpc(socketPath: String, command: String): String {
+        val socket = LocalSocket()
+        try {
+            socket.connect(LocalSocketAddress(socketPath, LocalSocketAddress.Namespace.FILESYSTEM))
+            val out = PrintWriter(socket.outputStream, true)
+            val input = BufferedReader(InputStreamReader(socket.inputStream))
+            out.println(command)
+            return input.readLine() ?: throw IOException("daemon closed connection without responding")
+        } finally {
+            try {
+                socket.close()
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    /**
+     * Poll-connect to the given Unix socket path until it accepts a connection
+     * or the timeout elapses. Used to wait for a freshly-spawned daemon to
+     * bind its control socket.
+     */
+    private fun waitForLocalSocket(socketPath: String, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var sleepMs = 5L
+        while (System.currentTimeMillis() < deadline) {
+            val socket = LocalSocket()
+            try {
+                socket.connect(LocalSocketAddress(socketPath, LocalSocketAddress.Namespace.FILESYSTEM))
+                return true
+            } catch (_: Exception) {
+                Thread.sleep(sleepMs)
+                sleepMs = (sleepMs * 2).coerceAtMost(500)
+            } finally {
+                try {
+                    socket.close()
+                } catch (_: Exception) {
+                }
+            }
+        }
+        return false
     }
 
     private fun collectDebugLogs(): String {

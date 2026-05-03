@@ -23,6 +23,7 @@ import io.geph.android.GephDaemon
 import io.geph.android.MainActivity
 import io.geph.android.R
 import kotlinx.serialization.json.*
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -162,7 +163,9 @@ class TunnelManager(parentService: TunnelVpnService?) {
         }
         // Create a config from the DaemonArgs
         val config = daemonArgs.toConfig(requireContext()).jsonObject
-        
+
+        val controlSockPath = vpnControlSockPath(requireContext())
+
         // Add VPN-specific configurations to the config
         val vpnEnabledConfig = buildJsonObject {
             // Copy all elements from the original config
@@ -174,13 +177,15 @@ class TunnelManager(parentService: TunnelVpnService?) {
             if (fd >= 0) {
                 put("vpn_fd", fd)
             }
-            
-            // Ensure control port is set for daemon_rpc
-            put("control_listen", "127.0.0.1:10000")
+
+            // Serve the control RPC over a Unix-domain socket in the app's
+            // private files dir, instead of a localhost TCP port that other
+            // apps on the device could connect to.
+            put("control_listen_unix", controlSockPath)
         }
-        
+
         // Create and start the daemon
-        gephDaemon = GephDaemon(requireContext(), vpnEnabledConfig, false)
+        gephDaemon = GephDaemon(requireContext(), vpnEnabledConfig)
         
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // For older Android versions, manually handle tunnel I/O
@@ -257,10 +262,23 @@ class TunnelManager(parentService: TunnelVpnService?) {
 
     companion object {
         const val NOTIFICATION_ID = 7839214
-        
+
         // The key for storing DaemonArgs in SharedPreferences
         const val DAEMON_ARGS = "daemonArgs"
-        
+
+        private const val VPN_CONTROL_SOCK_NAME = "control.sock"
+        private const val FALLBACK_CONTROL_SOCK_NAME = "control-fallback.sock"
+
+        /** Filesystem path of the VPN daemon's control RPC Unix socket. */
+        @JvmStatic
+        fun vpnControlSockPath(context: Context): String =
+            File(context.filesDir, VPN_CONTROL_SOCK_NAME).absolutePath
+
+        /** Filesystem path of the fallback (non-VPN) daemon's control RPC Unix socket. */
+        @JvmStatic
+        fun fallbackControlSockPath(context: Context): String =
+            File(context.filesDir, FALLBACK_CONTROL_SOCK_NAME).absolutePath
+
         private const val LOG_TAG = "TunnelManager"
     }
 
