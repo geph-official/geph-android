@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">203643111221</string>
+    <string name="google_api_key" translatable="false">AIzaSyA7ZvHeS-Gikmw58XarHdZqCujYD3NmwRE</string>
+    <string name="google_app_id" translatable="false">1:203643111221:android:f8e7f23b00b66f2b2b6e7c</string>
+    <string name="google_storage_bucket" translatable="false">geph-android.appspot.com</string>
+    <string name="project_id" translatable="false">geph-android</string>
+</resources>

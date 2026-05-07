@@ -14,6 +14,11 @@ private class FirebaseAccountEventSink(private val context: Context) : AccountEv
         FirebaseAnalytics.getInstance(context)
     }
 
+    override fun initialize() {
+        // Touch the lazy instance so Firebase Analytics starts automatic collection on app launch.
+        analytics
+    }
+
     override fun onPlusTransition() {
         analytics.logEvent("buyPlus", null)
     }

@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         bindActivity()
         bindBackHandler()
+        accountEventSink.initialize()
 
         val filter =
                 IntentFilter().apply {

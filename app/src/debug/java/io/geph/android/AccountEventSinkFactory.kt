@@ -6,5 +6,6 @@ import android.content.Context
 fun createAccountEventSink(context: Context): AccountEventSink = NoOpAccountEventSink
 
 private object NoOpAccountEventSink : AccountEventSink {
+    override fun initialize() = Unit
     override fun onPlusTransition() = Unit
 }
