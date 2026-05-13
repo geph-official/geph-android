@@ -37,7 +37,6 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import kotlinx.serialization.json.*
-import org.apache.commons.text.StringEscapeUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.concurrent.thread
@@ -272,19 +271,25 @@ class MainActivity : AppCompatActivity() {
                 val result = callRpcInner(verb, jsonArgs)
                 runOnUiThread {
                     wbview.evaluateJavascript(
-                            "$cback[0](\"${StringEscapeUtils.escapeEcmaScript(result)}\")",
+                            "$cback[0](${quoteJavaScriptString(result)})",
                             null
                     )
                 }
             } catch (e: Exception) {
                 runOnUiThread {
                     wbview.evaluateJavascript(
-                            "$cback[1](\"${StringEscapeUtils.escapeEcmaScript(e.message)}\")",
+                            "$cback[1](${quoteJavaScriptString(e.message ?: e.toString())})",
                             null
                     )
                 }
             }
         }
+    }
+
+    private fun quoteJavaScriptString(value: String): String {
+        return JSONObject.quote(value)
+                .replace("\u2028", "\\u2028")
+                .replace("\u2029", "\\u2029")
     }
 
     // -------------------------------------------------------------------
