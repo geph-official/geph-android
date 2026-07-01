@@ -26,6 +26,13 @@ class TunnelVpnService : VpnService() {
             tunnelManager.signalStopService()
             return START_NOT_STICKY
         }
+        if (intent?.action == ACTION_RESTART_ENGINE) {
+            Log.d(LOG_TAG, "received restart-engine action")
+            // Off the main thread: the restart kills and respawns the engine
+            // child. The caller observes completion via the control socket.
+            Thread { tunnelManager.restartEngine() }.start()
+            return START_NOT_STICKY
+        }
         tunnelManager.onStartCommand(intent, flags, startId)
         return START_NOT_STICKY
     }
@@ -72,6 +79,7 @@ class TunnelVpnService : VpnService() {
 
     companion object {
         const val ACTION_STOP_VPN = "io.geph.android.action.STOP_VPN"
+        const val ACTION_RESTART_ENGINE = "io.geph.android.action.RESTART_ENGINE"
         const val TUNNEL_VPN_DISCONNECT_BROADCAST = "tunnelVpnDisconnectBroadcast"
         const val TUNNEL_VPN_START_BROADCAST = "tunnelVpnStartBroadcast"
         const val TUNNEL_VPN_START_SUCCESS_EXTRA = "tunnelVpnStartSuccessExtra"

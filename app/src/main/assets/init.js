@@ -23,6 +23,10 @@ window["NATIVE_GATE"] = {
     await callRpc("restart_daemon", [daemon_args]);
   },
 
+  async set_exit_constraint(exit) {
+    await callRpc("set_exit_constraint", [exit]);
+  },
+
   async stop_daemon() {
     await this.daemon_rpc("stop", []);
   },

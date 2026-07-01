@@ -22,6 +22,7 @@ import io.geph.android.DaemonArgs
 import io.geph.android.GephDaemon
 import io.geph.android.MainActivity
 import io.geph.android.R
+import io.geph.android.ReviewPromptState
 import kotlinx.serialization.json.*
 import java.io.File
 import java.io.FileInputStream
@@ -38,6 +39,10 @@ class TunnelManager(parentService: TunnelVpnService?) {
     private var parentService: TunnelVpnService? = parentService
     private var tunFd: ParcelFileDescriptor? = null
     private var gephDaemon: GephDaemon? = null
+    // How the engine reaches the tun: 0 = inherits the app's fd 0 (API 26+,
+    // dup2'd once at first start and never closed), -1 = legacy stdio pump.
+    private var engineFd = -1
+    private var reviewSessionRecorded = false
 
     fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) {
@@ -152,7 +157,7 @@ class TunnelManager(parentService: TunnelVpnService?) {
     }
 
     private fun startGephDaemon(vpnInterface: ParcelFileDescriptor, daemonArgs: DaemonArgs) {
-        val fd = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        engineFd = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val fd = vpnInterface.detachFd()
             val libc = Native.load(LibC::class.java)
             libc.fcntl(fd, F_SETFD, 0)
@@ -161,6 +166,24 @@ class TunnelManager(parentService: TunnelVpnService?) {
         } else {
             -1 // Will handle stdio-based approach for older versions
         }
+
+        spawnEngine(daemonArgs)
+
+        if (!reviewSessionRecorded) {
+            ReviewPromptState.recordVpnSessionStarted(requireContext())
+            reviewSessionRecorded = true
+        }
+
+        // Broadcast successful VPN start
+        parentService?.broadcastVpnStart(true)
+    }
+
+    /**
+     * Spawn a geph5-client engine against the already-configured tun (the
+     * app's fd 0 on API 26+, the stdio pump otherwise). Used both for the
+     * first start and for in-place restarts.
+     */
+    private fun spawnEngine(daemonArgs: DaemonArgs) {
         // Create a config from the DaemonArgs
         val config = daemonArgs.toConfig(requireContext()).jsonObject
 
@@ -174,8 +197,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
             }
 
             // Add VPN fd configuration if available
-            if (fd >= 0) {
-                put("vpn_fd", fd)
+            if (engineFd >= 0) {
+                put("vpn_fd", engineFd)
             }
 
             // Serve the control RPC over a Unix-domain socket in the app's
@@ -185,60 +208,111 @@ class TunnelManager(parentService: TunnelVpnService?) {
         }
 
         // Create and start the daemon
-        gephDaemon = GephDaemon(requireContext(), vpnEnabledConfig)
-        
+        val daemon = GephDaemon(requireContext(), vpnEnabledConfig)
+        gephDaemon = daemon
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // For older Android versions, manually handle tunnel I/O
-            startLegacyIo(vpnInterface)
+            startLegacyIo(tunFd!!, daemon)
         }
-        
-        // Broadcast successful VPN start
-        parentService?.broadcastVpnStart(true)
-        
-        // Monitor daemon for crashes
+
+        // Monitor the engine for crashes. Only tear the service down if the
+        // engine that exited is still the current one — an engine we replaced
+        // in restartEngine() exits deliberately.
         thread {
             try {
-                val exitCode = gephDaemon?.waitForExit() ?: return@thread
-                Log.e(LOG_TAG, "Daemon process exited with code: $exitCode")
-                signalStopService()
+                val exitCode = daemon.waitForExit()
+                if (gephDaemon === daemon) {
+                    Log.e(LOG_TAG, "Daemon process exited with code: $exitCode")
+                    signalStopService()
+                } else {
+                    Log.i(LOG_TAG, "old engine exited with code $exitCode after restart")
+                }
             } catch (e: Exception) {
                 Log.e(LOG_TAG, "Error monitoring daemon process: ${e.message}")
             }
         }
     }
-    
-    private fun startLegacyIo(vpnInterface: ParcelFileDescriptor) {
+
+    /**
+     * Swap the engine under the live tun: kill the current geph5-client and
+     * spawn a fresh one from the (re-read) persisted DaemonArgs. The
+     * VpnService and tun stay up the whole time, so traffic blackholes rather
+     * than leaks during the gap. Used to apply a new exit while connected.
+     */
+    @Synchronized
+    fun restartEngine() {
+        val old = gephDaemon ?: run {
+            Log.w(LOG_TAG, "restartEngine with no running engine; ignoring")
+            return
+        }
+
+        val prefs = requireContext().getHarmonySharedPreferences("daemon")
+        val daemonArgsJson = prefs.getString(DAEMON_ARGS, null)
+        if (daemonArgsJson == null) {
+            Log.e(LOG_TAG, "restartEngine: no daemon arguments in preferences")
+            return
+        }
+        val daemonArgs = try {
+            val json = Json { ignoreUnknownKeys = true }
+            json.decodeFromString(DaemonArgs.serializer(), daemonArgsJson)
+        } catch (e: Exception) {
+            Log.e(LOG_TAG, "restartEngine: failed to parse daemon arguments: ${e.message}")
+            return
+        }
+
+        // Detach first so the old engine's watchdog sees it is no longer
+        // current and does not tear the service down.
+        gephDaemon = null
+        old.stopDaemon()
+        spawnEngine(daemonArgs)
+    }
+
+    private fun startLegacyIo(vpnInterface: ParcelFileDescriptor, daemon: GephDaemon) {
+        // The pumps capture the engine instance they serve (not the field), so
+        // threads belonging to a replaced engine die with it instead of
+        // fighting the new engine's pumps. The streams are never closed here:
+        // closing them would close the shared tun fd, whose lifetime belongs
+        // to tunFd (closed in terminateDaemon).
         // download
         Log.e(LOG_TAG, "VPN I/O SET UP")
         Thread {
             val body = ByteArray(40000)
             val writer = FileOutputStream(vpnInterface.fileDescriptor)
-            while (!Thread.currentThread().isInterrupted && gephDaemon?.isAlive == true) {
-                val n = gephDaemon?.downloadVpn(body) ?: -1
-                if (n <= 0) {
-                    break
+            try {
+                while (!Thread.currentThread().isInterrupted && daemon.isAlive) {
+                    val n = daemon.downloadVpn(body)
+                    if (n <= 0) {
+                        break
+                    }
+                    writer.write(body, 0, n)
                 }
-                writer.write(body, 0, n)
+            } catch (e: Exception) {
+                Log.d(LOG_TAG, "VPN download pump exited: ${e.message}")
             }
-            writer.close()
         }.start()
         // upload
         Thread {
             Log.e(LOG_TAG, "VPN I/O UP STARTED")
             val body = ByteArray(40000)
             val reader = FileInputStream(vpnInterface.fileDescriptor)
-            while (!Thread.currentThread().isInterrupted && gephDaemon?.isAlive == true) {
-                val n = reader.read(body)
-                if (n <= 0) {
-                    break
+            try {
+                while (!Thread.currentThread().isInterrupted && daemon.isAlive) {
+                    val n = reader.read(body)
+                    if (n <= 0) {
+                        break
+                    }
+                    daemon.uploadVpn(body, n)
                 }
-                gephDaemon?.uploadVpn(body, n)
+            } catch (e: Exception) {
+                Log.d(LOG_TAG, "VPN upload pump exited: ${e.message}")
             }
-            reader.close()
         }.start()
     }
 
     fun terminateDaemon() {
+        parentService?.let { ReviewPromptState.recordVpnSessionEnded(it) }
+        reviewSessionRecorded = false
         gephDaemon?.stopDaemon()
         gephDaemon = null
         
@@ -253,8 +327,8 @@ class TunnelManager(parentService: TunnelVpnService?) {
     }
 
     fun signalStopService() {
-        parentService?.broadcastVpnDisconnect()
         terminateDaemon()
+        parentService?.broadcastVpnDisconnect()
         stopForegroundCompat()
         parentService?.stopSelf()
         Process.killProcess(Process.myPid())

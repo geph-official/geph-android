@@ -346,6 +346,10 @@ class MainActivity : AppCompatActivity() {
             "get_lan_addresses" -> {
                 return rpcGetLanAddresses()
             }
+            "set_exit_constraint" -> {
+                val exit = Json.parseToJsonElement(jsonArgs!!).jsonArray[0]
+                return rpcSetExitConstraint(exit)
+            }
             "get_app_icon" -> {
                 return rpcGetAppIcon(args.getString(0))
             }
@@ -446,6 +450,58 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "Error starting daemon: ${e.message}", e)
             throw e
         }
+    }
+
+    // -------------------------------------------------------------------
+    // "set_exit_constraint" calls here: persists the new exit and, if the
+    // tunnel is up, restarts the engine in place (the VpnService and tun stay
+    // up throughout, so traffic blackholes rather than leaks during the swap)
+    // -------------------------------------------------------------------
+    private fun rpcSetExitConstraint(exit: JsonElement): String {
+        val json = Json { ignoreUnknownKeys = true }
+        val prefs = applicationContext.getHarmonySharedPreferences("daemon")
+        val argsJson = prefs.getString(TunnelManager.DAEMON_ARGS, null)
+                ?: return "null" // never started; nothing to update
+        val newArgs = json.decodeFromString(DaemonArgs.serializer(), argsJson).copy(exit = exit)
+        // commit(), not apply(): the VPN service process re-reads these on
+        // restart, so the write must be durable before we send the intent.
+        prefs.edit()
+                .putString(
+                        TunnelManager.DAEMON_ARGS,
+                        json.encodeToString(DaemonArgs.serializer(), newArgs)
+                )
+                .commit()
+
+        // Probe the engine's control socket to see whether the tunnel is up at
+        // all (works across processes, unlike TunnelState). start_time doubles
+        // as the restart ack: the new engine reports a different one.
+        val socketPath = TunnelManager.vpnControlSockPath(applicationContext)
+        val startTimeReq = """{"jsonrpc":"2.0","id":1,"method":"start_time","params":[]}"""
+        val oldStartTime = try {
+            localSocketRpc(socketPath, startTimeReq)
+        } catch (e: Exception) {
+            // Not connected: the new exit simply applies on the next connect.
+            return "null"
+        }
+
+        val restartIntent =
+                Intent(this, TunnelVpnService::class.java).apply {
+                    action = TunnelVpnService.ACTION_RESTART_ENGINE
+                }
+        startService(restartIntent)
+
+        val deadline = System.currentTimeMillis() + 30_000
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                if (localSocketRpc(socketPath, startTimeReq) != oldStartTime) {
+                    return "null"
+                }
+            } catch (_: Exception) {
+                // mid-swap; keep waiting
+            }
+            Thread.sleep(250)
+        }
+        throw Exception("engine did not come back within 30 seconds")
     }
 
     // -------------------------------------------------------------------
