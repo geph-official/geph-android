@@ -13,6 +13,8 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.MotionEvent
@@ -53,6 +55,12 @@ class MainActivity : AppCompatActivity() {
     private var daemonArgs: DaemonArgs? = null
 
     private val accountEventSink by lazy { createAccountEventSink(applicationContext) }
+    private val reviewPrompter by lazy { createReviewPrompter(applicationContext) }
+    private val reviewPromptHandler by lazy { Handler(Looper.getMainLooper()) }
+    private val reviewPromptRunnable = Runnable {
+        maybeShowReviewPrompt()
+        scheduleReviewPromptCheck()
+    }
 
 
     // -------------------------------------------------------------------
@@ -128,6 +136,8 @@ class MainActivity : AppCompatActivity() {
             }
             startAutoUpdateService()
         }
+
+        maybeShowReviewPrompt()
     }
 
     override fun onResume() {
@@ -139,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                 stopVpn()
             }
         }
+        maybeShowReviewPrompt()
     }
 
     override fun onDestroy() {
@@ -149,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         mWebView?.removeJavascriptInterface("Android")
         mWebView?.destroy()
         mWebView = null
+        reviewPromptHandler.removeCallbacks(reviewPromptRunnable)
 
         Log.d(TAG, "destroying MainActivity")
     }
@@ -331,6 +343,9 @@ class MainActivity : AppCompatActivity() {
             "get_app_list" -> {
                 return rpcGetAppList()
             }
+            "get_lan_addresses" -> {
+                return rpcGetLanAddresses()
+            }
             "get_app_icon" -> {
                 return rpcGetAppIcon(args.getString(0))
             }
@@ -488,6 +503,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------
+    // Non-loopback IPv4 addresses of this device, for the GUI's
+    // "listen on all interfaces" display
+    // -------------------------------------------------------------------
+    fun rpcGetLanAddresses(): String {
+        val addresses = JSONArray()
+        java.net.NetworkInterface.getNetworkInterfaces()?.toList()
+                ?.filter { it.isUp && !it.isLoopback }
+                ?.flatMap { it.inetAddresses.toList() }
+                ?.filter { it is java.net.Inet4Address && !it.isLoopbackAddress && !it.isLinkLocalAddress }
+                ?.forEach { addresses.put(it.hostAddress) }
+        return addresses.toString()
+    }
+
+    // -------------------------------------------------------------------
     // Example: get app icon
     // -------------------------------------------------------------------
     fun rpcGetAppIcon(packageName: String?): String {
@@ -557,14 +586,37 @@ class MainActivity : AppCompatActivity() {
             return tunnelState.startingTunnelManager || tunnelState.tunnelManager != null
         }
 
+    private fun maybeShowReviewPrompt() {
+        reviewPrompter.maybePrompt(this)
+        scheduleReviewPromptCheck()
+    }
+
+    private fun scheduleReviewPromptCheck() {
+        reviewPromptHandler.removeCallbacks(reviewPromptRunnable)
+        if (!ReviewPromptState.shouldScheduleReviewPrompt(applicationContext)) {
+            return
+        }
+
+        val delayMs = ReviewPromptState.remainingContinuousVpnRuntimeMs(applicationContext)
+        if (delayMs > 0L) {
+            reviewPromptHandler.postDelayed(reviewPromptRunnable, delayMs)
+        }
+    }
+
     private inner class Receiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 TunnelVpnService.TUNNEL_VPN_DISCONNECT_BROADCAST -> {
-                    // handle if you want
+                    maybeShowReviewPrompt()
                 }
                 TunnelVpnService.TUNNEL_VPN_START_BROADCAST -> {
-                    // handle if you want
+                    if (intent.getBooleanExtra(
+                                    TunnelVpnService.TUNNEL_VPN_START_SUCCESS_EXTRA,
+                                    false
+                            )
+                    ) {
+                        maybeShowReviewPrompt()
+                    }
                 }
                 TunnelVpnService.TUNNEL_VPN_START_SUCCESS_EXTRA -> {
                     Log.d(TAG, "broadcast: TUNNEL_VPN_START_SUCCESS_EXTRA")

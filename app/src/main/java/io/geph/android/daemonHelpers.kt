@@ -16,6 +16,17 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 
 @Serializable
+data class ProxyArgs(
+    val autoconf: Boolean,
+    @SerialName("listen_all")
+    val listenAll: Boolean,
+    @SerialName("socks5_port")
+    val socks5Port: Int,
+    @SerialName("http_port")
+    val httpPort: Int,
+)
+
+@Serializable
 data class DaemonArgs(
     val secret: String,
     val metadata: JsonElement,
@@ -28,9 +39,8 @@ data class DaemonArgs(
 
     val exit: JsonElement,
 
-
-    @SerialName("listen_all")
-    val listenAll: Boolean,
+    // null = no local proxy listeners at all
+    val proxy: ProxyArgs? = null,
     @SerialName("allow_direct")
     val allowDirect: Boolean,
 
@@ -53,9 +63,12 @@ data class DaemonArgs(
                 else -> {}
             }
 
-            if (listenAll) {
-                put("socks5_listen", "0.0.0.0:9909")
-                put("http_proxy_listen", "0.0.0.0:9910")
+            // Omitting the listen keys entirely means the engine binds no
+            // proxy ports.
+            if (proxy != null) {
+                val host = if (proxy.listenAll) "0.0.0.0" else "127.0.0.1"
+                put("socks5_listen", "$host:${proxy.socks5Port}")
+                put("http_proxy_listen", "$host:${proxy.httpPort}")
             }
 
             put("sess_metadata", metadata)

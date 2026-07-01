@@ -120,10 +120,15 @@ window["NATIVE_GATE"] = {
         await callRpc("open_browser", [url]);
   },
 
+  async get_lan_addresses() {
+    return await callRpc("get_lan_addresses", []);
+  },
+
   // Properties required by the interface
   supports_listen_all: true,
   supports_app_whitelist: true,
   supports_prc_whitelist: false,
+  supports_proxy_mode: true,
   supports_proxy_conf: false,
   supports_vpn_conf: false,
   supports_autoupdate: true,
