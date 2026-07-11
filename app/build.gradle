@@ -24,7 +24,7 @@ android {
         applicationId 'io.geph.android'
         minSdk 21
         targetSdk 35
-        versionCode 11222
+        versionCode 11224
         versionName '5.7.1'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
@@ -88,6 +88,7 @@ dependencies {
     implementation 'com.frybits.harmony:harmony:1.1.6'
     releasePlayImplementation(platform("com.google.firebase:firebase-bom:32.7.1"))
     releasePlayImplementation "com.google.firebase:firebase-analytics"
+    releasePlayImplementation 'com.google.android.play:review:2.0.2'
 }
 
 task preBuildScript(type: Exec) {
