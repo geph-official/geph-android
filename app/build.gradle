@@ -84,6 +84,8 @@ dependencies {
     implementation files('jna-5.9.0.aar')
     implementation "androidx.webkit:webkit:1.12.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+    // Parses the engine config template shared with geph5-app (default-config.yaml)
+    implementation 'org.yaml:snakeyaml:2.2'
     implementation 'androidx.browser:browser:1.8.0'
     implementation 'com.frybits.harmony:harmony:1.1.6'
     releasePlayImplementation(platform("com.google.firebase:firebase-bom:32.7.1"))

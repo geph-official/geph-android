@@ -20,6 +20,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import io.geph.android.DaemonArgs
 import io.geph.android.GephDaemon
+import io.geph.android.VpnWiring
 import io.geph.android.MainActivity
 import io.geph.android.R
 import io.geph.android.ReviewPromptState
@@ -196,19 +197,18 @@ class TunnelManager(parentService: TunnelVpnService?) {
                 put(key, value)
             }
 
-            // Add VPN fd configuration if available
-            if (engineFd >= 0) {
-                put("vpn_fd", engineFd)
-            }
-
             // Serve the control RPC over a Unix-domain socket in the app's
             // private files dir, instead of a localhost TCP port that other
             // apps on the device could connect to.
             put("control_listen_unix", controlSockPath)
         }
 
+        // The tun fd is handed over on the command line (--vpn-fd / the legacy
+        // --stdio-vpn pump); the engine config no longer carries VPN keys.
+        val wiring = if (engineFd >= 0) VpnWiring.Fd(engineFd) else VpnWiring.Stdio
+
         // Create and start the daemon
-        val daemon = GephDaemon(requireContext(), vpnEnabledConfig)
+        val daemon = GephDaemon(requireContext(), vpnEnabledConfig, wiring)
         gephDaemon = daemon
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {

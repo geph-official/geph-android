@@ -317,7 +317,8 @@ class MainActivity : AppCompatActivity() {
                 return "null"
             }
             "restart_daemon" -> {
-                throw Exception("restarting not supported")
+                rpcRestartDaemon(args.getJSONObject(0))
+                return "null"
             }
             "stop_daemon" -> {
                 // Stop the VPN service
@@ -463,6 +464,31 @@ class MainActivity : AppCompatActivity() {
         val argsJson = prefs.getString(TunnelManager.DAEMON_ARGS, null)
                 ?: return "null" // never started; nothing to update
         val newArgs = json.decodeFromString(DaemonArgs.serializer(), argsJson).copy(exit = exit)
+        persistArgsAndRestartEngine(newArgs)
+        return "null"
+    }
+
+    // -------------------------------------------------------------------
+    // "restart_daemon" calls here: the GUI re-sends the full DaemonArgs when a
+    // tunnel setting is changed while connected. Persist them and swap the
+    // engine in place, exactly like set_exit_constraint.
+    // -------------------------------------------------------------------
+    private fun rpcRestartDaemon(argsObj: JSONObject) {
+        val json = Json { ignoreUnknownKeys = true }
+        val newArgs = json.decodeFromString(DaemonArgs.serializer(), argsObj.toString())
+        daemonArgs = newArgs
+        persistArgsAndRestartEngine(newArgs)
+    }
+
+    /**
+     * Durably persist new DaemonArgs and, if the tunnel is currently up, swap
+     * the engine in place (the VpnService and tun stay up throughout, so
+     * traffic blackholes rather than leaks during the swap). If the tunnel is
+     * down, the new args simply apply on the next connect.
+     */
+    private fun persistArgsAndRestartEngine(newArgs: DaemonArgs) {
+        val json = Json { ignoreUnknownKeys = true }
+        val prefs = applicationContext.getHarmonySharedPreferences("daemon")
         // commit(), not apply(): the VPN service process re-reads these on
         // restart, so the write must be durable before we send the intent.
         prefs.edit()
@@ -480,8 +506,8 @@ class MainActivity : AppCompatActivity() {
         val oldStartTime = try {
             localSocketRpc(socketPath, startTimeReq)
         } catch (e: Exception) {
-            // Not connected: the new exit simply applies on the next connect.
-            return "null"
+            // Not connected: the new args simply apply on the next connect.
+            return
         }
 
         val restartIntent =
@@ -494,7 +520,7 @@ class MainActivity : AppCompatActivity() {
         while (System.currentTimeMillis() < deadline) {
             try {
                 if (localSocketRpc(socketPath, startTimeReq) != oldStartTime) {
-                    return "null"
+                    return
                 }
             } catch (_: Exception) {
                 // mid-swap; keep waiting
@@ -691,7 +717,7 @@ class MainActivity : AppCompatActivity() {
         fallbackDaemon = null
 
         val fallbackConfig = buildJsonObject {
-            for ((key, value) in configTemplate()) {
+            for ((key, value) in configTemplate(applicationContext)) {
                 put(key, value)
             }
             put("cache", applicationContext.filesDir.resolve("cache_fallback").absolutePath)

@@ -7,13 +7,15 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
-import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import org.yaml.snakeyaml.Yaml
 
 @Serializable
 data class ProxyArgs(
@@ -44,10 +46,15 @@ data class DaemonArgs(
     @SerialName("allow_direct")
     val allowDirect: Boolean,
 
+    // Defaults to true so DaemonArgs persisted by older app versions (which
+    // predate the setting) keep Geph's original allow-LAN behavior.
+    @SerialName("allow_lan")
+    val allowLan: Boolean = true,
+
 ) {
     fun toConfig(ctx: Context): JsonElement {
         return buildJsonObject {
-            for ((originalKey, originalValue) in configTemplate()) {
+            for ((originalKey, originalValue) in configTemplate(ctx)) {
                 put(originalKey, originalValue)
             }
 
@@ -75,8 +82,11 @@ data class DaemonArgs(
             put("dry_run", false)
             put("passthrough_china", prcWhitelist)
             put("allow_direct", allowDirect)
-            if (prcWhitelist || !(metadata is JsonNull)) {
+            put("allow_lan", allowLan)
+            if (prcWhitelist) {
                 put("spoof_dns", true)
+            } else {
+                put("spoof_dns", false)
             }
             put("cache", ctx.filesDir.toString() + "/cache_" + secret)
             putJsonObject("credentials") {
@@ -87,61 +97,41 @@ data class DaemonArgs(
     }
 }
 
-fun configTemplate(): JsonObject {
+// Desktop-only keys in the shared template: geph5-app binds its proxy/control
+// listeners on fixed localhost TCP ports, while Android sets them per-daemon
+// (a Unix control socket, and proxy ports only when the user enables them).
+private val DESKTOP_ONLY_TEMPLATE_KEYS =
+    setOf("socks5_listen", "http_proxy_listen", "pac_listen", "control_listen")
+
+/**
+ * The engine config template, loaded from the same default-config.yaml that
+ * geph5-app embeds (symlinked from the geph5 submodule into assets), so the
+ * broker routes and keys cannot drift between platforms. Mirroring geph5-app's
+ * supervisor, callers override the dynamic fields (credentials, exit, cache,
+ * listen addresses) on top of this. The template itself is inert (dry_run) so
+ * the fallback daemon can use it as-is.
+ */
+fun configTemplate(ctx: Context): JsonObject {
+    val yamlText =
+        ctx.assets.open("default-config.yaml").bufferedReader().use { it.readText() }
+    val template = yamlToJson(Yaml().load<Any?>(yamlText)).jsonObject
     return buildJsonObject {
-        put("exit_constraint", "auto")
-        put("bridge_mode", "Auto")
-        put("cache", JsonNull)
-
-        putJsonObject("broker") {
-            putJsonObject("priority_race") {
-                putJsonObject("1500") {
-                    putJsonObject("aws_lambda") {
-                        put("function_name", "geph-lambda-bouncer")
-                        put("region", "us-east-1")
-                        put("obfs_key", "855MJGAMB58MCPJBB97NADJ36D64WM2T:C4TN2M1H68VNMRVCCH57GDV2C5VN6V3RB8QMWP235D0P4RT2ACV7GVTRCHX3EC37")
-                    }
-                }
-                putJsonObject("300") {
-                    putJsonObject("fronted") {
-                        put("front", "https://kubernetes.io/")
-                        put("host", "svitania-naidallszei-2.netlify.app")
-                        put("override_dns", buildJsonArray {
-                            add("75.2.60.5:443")
-                        })
-                    }
-                }
-                putJsonObject("0") {
-                    putJsonObject("fronted") {
-                        put("front", "https://kubernetes.io/")
-                        put("host", "svitania-naidallszei-2.netlify.app")
-                    }
-                }
-            }
+        for ((key, value) in template) {
+            if (key in DESKTOP_ONLY_TEMPLATE_KEYS) continue
+            put(key, value)
         }
-
-        putJsonObject("tunneled_broker") {
-            put("direct", "https://broker.geph.io")
-        }
-
-        putJsonObject("broker_keys") {
-            put("master", "88c1d2d4197bed815b01a22cadfc6c35aa246dddb553682037a118aebfaa3954")
-            put("mizaru_free", "0558216cbab7a9c46f298f4c26e171add9af87d0694988b8a8fe52ee932aa754")
-            put("mizaru_plus", "cf6f58868c6d9459b3a63bc2bd86165631b3e916bad7f62b578cd9614e0bcb3b")
-            put("mizaru_bw", "3082010a0282010100d0ae53a794ea37bf2e100cb3a872177ec6c11e8375fdcbf92960ce0293465674eb1426a1841b7622a58979a5ff3f8aa2301a621545e9b90bb39d1a6bfda19d6ca1aae74a3192ddfd2b9558eb652c3c2c22f42bdde272852fb67d93cae5846213512c474bf799844aee019bf718f6fa64223be06364459fc8dec66796b141d450d730c4fffe1cac7df8f05591560afa44bcf274f6c0e2303b39c21ab09d19b459ee594512b8341f3d407c026e2509f42c6d89f82f6a3a36fd5c05ad423cd99ad39089403eb9122ea60ef6648afff65438e8e26ce41fa55b9b18741965c77a627bae947bd38fc345e9adab42d6c458f6e194e4232cfd3f04924d5a5e932fe769610203010001")
-        }
-
-        put("vpn", false)
-        put("spoof_dns", false)
-        put("passthrough_china", false)
         put("dry_run", true)
-        put("allow_direct", false)
-
-        putJsonObject("credentials") {
-            put("secret", "")
-        }
-
-        put("sess_metadata", JsonNull)
-        put("task_limit", JsonNull)
     }
+}
+
+private fun yamlToJson(node: Any?): JsonElement = when (node) {
+    null -> JsonNull
+    is Map<*, *> -> buildJsonObject {
+        for ((k, v) in node) put(k.toString(), yamlToJson(v))
+    }
+    is List<*> -> buildJsonArray { for (v in node) add(yamlToJson(v)) }
+    is Boolean -> JsonPrimitive(node)
+    is Number -> JsonPrimitive(node)
+    is String -> JsonPrimitive(node)
+    else -> JsonPrimitive(node.toString())
 }

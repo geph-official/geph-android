@@ -1,24 +1,34 @@
 package io.geph.android
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import java.io.File
 
 /**
- * A daemon class that uses a [JsonObject] as its configuration.
- * The constructor immediately writes the config to disk and starts the daemon process.
+ * How the spawned engine reaches the tun device, if at all.
  *
- * The daemon process is spawned with one of two stdio configurations:
- *  - API 26+: stdin is set to ProcessBuilder.Redirect.INHERIT so the parent's
- *    fd 0 (which can be dup2'd to a TUN fd by the caller) is visible to the
- *    child. This is how the VPN packets are exchanged.
- *  - API <26: ProcessBuilder.Redirect was added in API 26, so we cannot make
- *    the child inherit our fd 0. Instead the child is spawned with --stdio-vpn,
- *    which has it speak length-framed VPN packets on its own stdio (which the
- *    caller pumps through Java I/O).
+ *  - [None]: no VPN wiring (e.g. the dry-run fallback daemon).
+ *  - [Fd]: the tun fd has been detached from the [android.net.VpnService] and
+ *    dup2'd over the app's fd [Fd.fd] with FD_CLOEXEC cleared; stdin is set to
+ *    ProcessBuilder.Redirect.INHERIT so the child sees it, and the engine is
+ *    told to take it over with `--vpn-fd`. Requires API 26+
+ *    (ProcessBuilder.Redirect and fd inheritance).
+ *  - [Stdio]: legacy path for API <26, where we cannot make the child inherit
+ *    an fd. The child is spawned with --stdio-vpn, speaking length-framed VPN
+ *    packets on its own stdio (which the caller pumps through Java I/O).
+ */
+sealed class VpnWiring {
+    object None : VpnWiring()
+    data class Fd(val fd: Int) : VpnWiring()
+    object Stdio : VpnWiring()
+}
+
+/**
+ * A daemon class that uses a [JsonObject] as its configuration.
+ * The constructor immediately writes the config to disk and starts the daemon
+ * process, wired to the tun per [VpnWiring].
  *
  * Control RPC is always served by the daemon over a Unix-domain socket (set
  * via the `control_listen_unix` field in the config). Callers connect via
@@ -27,6 +37,7 @@ import java.io.File
 class GephDaemon(
     context: Context,
     config: JsonObject,
+    vpnWiring: VpnWiring = VpnWiring.None,
 ) {
     companion object {
         // Matches common ANSI CSI/OSC escape sequences so relayed logs stay readable.
@@ -63,13 +74,18 @@ class GephDaemon(
             "--config",
             configFile.absolutePath,
         )
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            command.add("--stdio-vpn")
+        when (vpnWiring) {
+            is VpnWiring.Fd -> {
+                command.add("--vpn-fd")
+                command.add(vpnWiring.fd.toString())
+            }
+            is VpnWiring.Stdio -> command.add("--stdio-vpn")
+            is VpnWiring.None -> {}
         }
 
         daemonProcess = try {
             val builder = configureNoColor(ProcessBuilder(command))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (vpnWiring is VpnWiring.Fd) {
                 builder.redirectInput(ProcessBuilder.Redirect.INHERIT)
             }
             builder.start()
