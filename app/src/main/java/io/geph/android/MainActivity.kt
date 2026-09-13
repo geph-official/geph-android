@@ -5,6 +5,7 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.LocalSocket
@@ -28,6 +29,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
 import com.frybits.harmony.getHarmonySharedPreferences
 import io.geph.android.tun2socks.TunnelManager
@@ -99,6 +103,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        bindWindowInsets()
         bindActivity()
         bindBackHandler()
         accountEventSink.initialize()
@@ -235,6 +240,32 @@ class MainActivity : AppCompatActivity() {
 
         wview.addJavascriptInterface(this, "Android")
         wview.loadUrl("https://appassets.androidplatform.net/htmlbuild/index.html")
+    }
+
+    private fun bindWindowInsets() {
+        if (Build.VERSION.SDK_INT < 35) return
+
+        // Android 16 no longer honors the edge-to-edge opt-out. Keep the
+        // WebView's viewport inside the bars, cutout and keyboard instead.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val container = findViewById<android.view.View>(R.id.main_container)
+        container.fitsSystemWindows = false
+        container.setBackgroundColor(Color.BLACK)
+        WindowCompat.getInsetsController(window, container).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(container) { view, insets ->
+            val safeArea = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                    WindowInsetsCompat.Type.displayCutout() or
+                    WindowInsetsCompat.Type.ime()
+            )
+            view.setPadding(safeArea.left, safeArea.top, safeArea.right, safeArea.bottom)
+            // The WebView already has a resized viewport; don't inset it twice.
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.requestApplyInsets(container)
     }
 
     private fun bindBackHandler() {

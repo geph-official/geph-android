@@ -31,6 +31,11 @@ window["NATIVE_GATE"] = {
     await this.daemon_rpc("stop", []);
   },
 
+  async logout() {
+    // Android uses the engine directly; the UI handles clearing credentials.
+    await this.stop_daemon();
+  },
+
   async is_running() {
     try {
       return (await this.daemon_rpc("conn_info", [])).state !== "Disconnected";

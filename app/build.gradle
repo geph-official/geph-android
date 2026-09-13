@@ -19,13 +19,13 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId 'io.geph.android'
         minSdk 21
-        targetSdk 35
-        versionCode 11224
-        versionName '5.7.1'
+        targetSdk 36
+        versionCode 11228
+        versionName '5.9.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -81,7 +81,6 @@ dependencies {
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.vdurmont:semver4j:3.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation files('jna-5.9.0.aar')
     implementation "androidx.webkit:webkit:1.12.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
     // Parses the engine config template shared with geph5-app (default-config.yaml)

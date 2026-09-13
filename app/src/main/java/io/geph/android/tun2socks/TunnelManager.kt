@@ -12,12 +12,10 @@ import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.Process
-import android.system.OsConstants.F_SETFD
+import android.system.Os
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.frybits.harmony.getHarmonySharedPreferences
-import com.sun.jna.Library
-import com.sun.jna.Native
 import io.geph.android.DaemonArgs
 import io.geph.android.GephDaemon
 import io.geph.android.VpnWiring
@@ -30,11 +28,6 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
 
-
-interface LibC : Library {
-    fun fcntl(fd: Int, cmd: Int, args: Int): Int
-    fun dup2(oldFd: Int, newFd: Int): Int
-}
 
 class TunnelManager(parentService: TunnelVpnService?) {
     private var parentService: TunnelVpnService? = parentService
@@ -127,6 +120,10 @@ class TunnelManager(parentService: TunnelVpnService?) {
             val builder = requireParentService().newBuilder()
                 .addAddress("100.64.89.64", 10)
                 .addRoute("0.0.0.0", 0)
+                // Configure both the IPv6 source address and default route so
+                // Android sends IPv6 through the engine instead of blocking it.
+                .addAddress("fd00::1", 64)
+                .addRoute("::", 0)
                 .addDnsServer("100.64.89.1")
                 .addDisallowedApplication(requireContext().packageName)
             
@@ -159,10 +156,11 @@ class TunnelManager(parentService: TunnelVpnService?) {
 
     private fun startGephDaemon(vpnInterface: ParcelFileDescriptor, daemonArgs: DaemonArgs) {
         engineFd = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val fd = vpnInterface.detachFd()
-            val libc = Native.load(LibC::class.java)
-            libc.fcntl(fd, F_SETFD, 0)
-            libc.dup2(fd, 0)
+            // dup2 clears FD_CLOEXEC on fd 0, allowing the engine to inherit
+            // it as stdin. Keep ownership of the original tun fd in tunFd.
+            // Use Android's syscall wrapper instead of the old JNA native
+            // library, which is incompatible with 16 KB page-size devices.
+            Os.dup2(vpnInterface.fileDescriptor, 0)
             0
         } else {
             -1 // Will handle stdio-based approach for older versions

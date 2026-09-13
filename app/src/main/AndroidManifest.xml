@@ -30,8 +30,14 @@
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="LockedOrientationActivity,DiscouragedApi">
+            <!-- Preserve the existing portrait UI during the API 36 migration.
+                 Revisit activity state restoration before targeting API 37. -->
+            <property
+                android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+                android:value="true" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

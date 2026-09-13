@@ -1,6 +1,7 @@
 package io.geph.android
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -86,7 +87,11 @@ class GephDaemon(
         daemonProcess = try {
             val builder = configureNoColor(ProcessBuilder(command))
             if (vpnWiring is VpnWiring.Fd) {
-                builder.redirectInput(ProcessBuilder.Redirect.INHERIT)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    builder.redirectInput(ProcessBuilder.Redirect.INHERIT)
+                } else {
+                    error("Inherited VPN descriptors require Android 8 or newer")
+                }
             }
             builder.start()
         } catch (e: Exception) {
@@ -146,7 +151,11 @@ class GephDaemon(
     fun waitForExit(): Int = daemonProcess.waitFor()
 
     fun stopDaemon() {
-        daemonProcess.destroyForcibly()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            daemonProcess.destroyForcibly()
+        } else {
+            daemonProcess.destroy()
+        }
         errorReaderThread?.interrupt()
         configFile.delete()
     }
